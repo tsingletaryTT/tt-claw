@@ -1,0 +1,68 @@
+# tt-claw .gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# Claude Code
+.claude/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+*.tmp
+
+# Backups
+backups/
+*.backup
+*.bak
+
+# Sensitive data (if any)
+*.key
+*.pem
+secrets/
+.env
+
+# User-specific configs
+config/local.json
+config/*.local.*
+
+# Cache
+cache/
+*.cache
+
+# Test artifacts
+test_output/
+coverage/
+.pytest_cache/
+
+# Documentation build artifacts
+docs/_build/
+docs/.doctrees/
+
+# Temporary files
+tmp/
+temp/
