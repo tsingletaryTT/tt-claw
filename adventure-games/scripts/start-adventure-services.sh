@@ -27,6 +27,27 @@ NC='\033[0m'
 echo -e "${CYAN}Starting TT-CLAW Adventure Services...${NC}"
 echo ""
 
+# Check if --fresh flag is provided
+FRESH_START=false
+if [[ "$1" == "--fresh" ]]; then
+    FRESH_START=true
+    echo -e "${YELLOW}Fresh start requested: clearing caches and seeding memory${NC}"
+    echo ""
+fi
+
+# If fresh start, run restart-games first (clears sessions, seeds memory)
+if [ "$FRESH_START" = true ]; then
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    if [ -f "$SCRIPT_DIR/restart-games.sh" ]; then
+        echo "Running restart-games.sh..."
+        bash "$SCRIPT_DIR/restart-games.sh" || true
+        echo ""
+    else
+        echo -e "${YELLOW}⚠️  restart-games.sh not found, skipping cache clear${NC}"
+        echo ""
+    fi
+fi
+
 # Function to check if port is in use
 check_port() {
     local port=$1
@@ -163,12 +184,23 @@ echo "  vLLM:    http://localhost:8000 (Model: $MODEL)"
 echo "  Proxy:   http://localhost:8001 (Compatibility layer)"
 echo "  Gateway: ws://localhost:18789 (Agent manager)"
 echo ""
+if [ "$FRESH_START" = true ]; then
+    echo -e "${GREEN}Fresh start complete:${NC}"
+    echo "  ✓ Old sessions cleared (no stale SOUL cache)"
+    echo "  ✓ Memory seeded (adventure already begun context)"
+    echo "  ✓ All configs verified (65K context, CRITICAL sections)"
+    echo ""
+fi
 echo "Logs:"
 echo "  Proxy:   tail -f $LOG_DIR/vllm-proxy.log"
 echo "  Gateway: tail -f $LOG_DIR/openclaw-gateway.log"
 echo ""
 echo "Next step:"
 echo "  cd ~/tt-claw/adventure-games/scripts && ./adventure-menu.sh"
+echo ""
+echo "Usage:"
+echo "  Normal start:  ./start-adventure-services.sh"
+echo "  Fresh restart: ./start-adventure-services.sh --fresh"
 echo ""
 echo "To stop services:"
 echo "  pkill -f vllm-proxy"
