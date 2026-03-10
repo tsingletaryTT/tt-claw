@@ -1,0 +1,19 @@
+{
+  "tools": [
+    {
+      "name": "show_dungeon_map",
+      "description": "Display ASCII dungeon layout with player position",
+      "enabled": true
+    },
+    {
+      "name": "roll_combat",
+      "description": "Handle turn-based combat with dice rolls",
+      "enabled": true
+    },
+    {
+      "name": "generate_loot",
+      "description": "Create TT-themed items as loot",
+      "enabled": true
+    }
+  ]
+}

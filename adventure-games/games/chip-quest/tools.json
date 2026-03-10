@@ -1,0 +1,19 @@
+{
+  "tools": [
+    {
+      "name": "show_ascii_map",
+      "description": "Display ASCII art map of current chip location",
+      "enabled": true
+    },
+    {
+      "name": "check_inventory",
+      "description": "Show player's collected artifacts and achievements",
+      "enabled": true
+    },
+    {
+      "name": "encounter_grue",
+      "description": "Trigger a TT-Grue encounter with educational challenge",
+      "enabled": true
+    }
+  ]
+}

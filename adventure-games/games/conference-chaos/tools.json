@@ -1,0 +1,19 @@
+{
+  "tools": [
+    {
+      "name": "show_floor_map",
+      "description": "Display conference floor layout",
+      "enabled": true
+    },
+    {
+      "name": "npc_conversation",
+      "description": "Handle NPC dialogue with memory",
+      "enabled": true
+    },
+    {
+      "name": "collect_card",
+      "description": "Add business card to collection",
+      "enabled": true
+    }
+  ]
+}

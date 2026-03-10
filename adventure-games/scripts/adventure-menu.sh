@@ -1,6 +1,6 @@
 #!/bin/bash
 # OpenClaw Adventure Games - Interactive Menu Launcher
-# GDC Infinity Demo Booth
+# EAC 2026 Demo Booth
 
 set -e
 
@@ -18,19 +18,14 @@ NC='\033[0m' # No Color
 show_banner() {
     echo -e "${CYAN}"
     cat << 'BANNER'
-╔═══════════════════════════════════════════════════════════════╗
-║                                                               ║
-║   ██████╗ ██████╗ ███████╗███╗   ██╗ ██████╗██╗      █████╗  ║
-║  ██╔═══██╗██╔══██╗██╔════╝████╗  ██║██╔════╝██║     ██╔══██╗ ║
-║  ██║   ██║██████╔╝█████╗  ██╔██╗ ██║██║     ██║     ███████║ ║
-║  ██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██║     ██║     ██╔══██║ ║
-║  ╚██████╔╝██║     ███████╗██║ ╚████║╚██████╗███████╗██║  ██║ ║
-║   ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝ ╚═════╝╚══════╝╚═╝  ╚═╝ ║
-║                                                               ║
-║            ADVENTURE GAMES - EAC 2026 DEMO BOOTH             ║
+
+                        -=| TT-CLAW |=-
+
+            ADVENTURE GAMES - EAC 2026 DEMO BOOTH
+
 BANNER
     get_service_status
-    echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
 }
 
 # Auto-detect and configure model with progress
@@ -106,7 +101,8 @@ show_status() {
     clear
     show_banner
     echo ""
-    echo -e "${CYAN}═══ System Status ══════════════════════════════════════════════${NC}"
+    echo -e "${CYAN}System Status${NC}"
+    echo ""
     echo ""
 
     # Check vLLM
@@ -127,7 +123,7 @@ show_status() {
 
     # Check agents
     echo ""
-    echo -e "${CYAN}═══ Available Games ════════════════════════════════════════════${NC}"
+    echo -e "${CYAN}Available Games${NC}"
     echo ""
     for agent in chip-quest terminal-dungeon conference-chaos; do
         SOUL_FILE="/home/ttclaw/.openclaw/agents/$agent/agent/SOUL.md"
@@ -141,12 +137,10 @@ show_status() {
     done
 
     echo ""
-    echo -e "${CYAN}═══ Model Override ═════════════════════════════════════════════${NC}"
+    echo -e "${CYAN}Model Override${NC}"
     echo ""
     echo -e "  To use a specific model:"
     echo -e "  ${GREEN}OPENCLAW_MODEL='your/model' ./adventure-menu.sh${NC}"
-    echo ""
-    echo -e "${CYAN}════════════════════════════════════════════════════════════════${NC}"
     echo ""
     read -p "Press Enter to return to menu..."
 }
@@ -156,15 +150,12 @@ show_menu() {
     clear
     show_banner
 
-    echo -e "${CYAN}═══════════════════════════════════════════════════════════════${NC}"
     echo ""
     echo -e "  ${GREEN}Welcome to the OpenClaw Adventure Games!${NC}"
     echo ""
     echo -e "  Three interconnected text adventures powered by AI running on"
     echo -e "  Tenstorrent hardware. All games share a connected universe at"
     echo -e "  Experience Architect Convergence 2026 (EAC 2026)."
-    echo ""
-    echo -e "${CYAN}═══════════════════════════════════════════════════════════════${NC}"
     echo ""
 
     echo -e "  ${YELLOW}1. Chip Quest${NC} ⭐ ${GREEN}(RECOMMENDED START)${NC}"
@@ -194,27 +185,28 @@ show_menu() {
     echo -e "  ${YELLOW}5.${NC} Read About TT-Grues 🐉"
     echo -e "  ${YELLOW}6.${NC} Exit"
     echo ""
-    echo -e "${CYAN}═══════════════════════════════════════════════════════════════${NC}"
-    echo ""
     echo -n "  Choose your adventure (0-6): "
 }
 
-# Launch game
+# Launch game with initial kickoff message
 launch_game() {
     local agent_id=$1
     echo ""
     echo -e "${CYAN}🚀 Starting $agent_id...${NC}"
     echo ""
+    echo -e "${YELLOW}TIP: The game will present numbered choices. Just type your choice!${NC}"
+    echo ""
+    sleep 2
+
     cd "$OPENCLAW_DIR"
-    ./openclaw.sh agent --agent "$agent_id" --interactive
+    # Launch TUI with initial message to trigger the game's starting prompt
+    ./openclaw.sh tui --session "$agent_id" --message "start the adventure"
 }
 
 # Show service management menu
 show_service_management() {
     clear
-    echo -e "${CYAN}═══════════════════════════════════════════════════════════════${NC}"
-    echo -e "${CYAN}   Service Management${NC}"
-    echo -e "${CYAN}═══════════════════════════════════════════════════════════════${NC}"
+    echo -e "${CYAN}Service Management${NC}"
     echo ""
     echo -e "  ${YELLOW}1.${NC} Check service status"
     echo -e "  ${YELLOW}2.${NC} Start all services"
@@ -312,7 +304,7 @@ main() {
     clear
     show_banner
     echo ""
-    echo -e "${CYAN}═══ Initializing ═══════════════════════════════════════════════${NC}"
+    echo -e "${CYAN}Initializing...${NC}"
     echo ""
 
     # Auto-detect model
