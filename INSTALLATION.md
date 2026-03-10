@@ -403,18 +403,29 @@ chmod +x ~/.openclaw/skills/*
 
 **Symptoms:**
 - `Cannot find module '/home/ttclaw/openclaw/dist/cli/index.js'`
+- `Cannot find module '/home/ttclaw/openclaw/dist/index.js'`
 - Gateway process exits immediately
 - Error in `/tmp/openclaw-gateway.log`
 
 **Causes:**
-1. **OpenClaw not built** (most common) - `dist/` directory missing
-2. Port 18789 already in use
-3. Previous gateway still running
-4. Dependencies not installed
+1. **Wrong path in wrapper script** (OpenClaw v2026.3.2 uses `dist/index.js` not `dist/cli/index.js`)
+2. **OpenClaw not built** - `dist/` directory missing
+3. Port 18789 already in use
+4. Previous gateway still running
+5. Dependencies not installed
 
-**Solution for "Cannot find module dist/cli/index.js":**
+**Solution 1: Fix wrapper script (if you see dist/cli/index.js error):**
 
-This means OpenClaw wasn't built (TypeScript not compiled to JavaScript).
+OpenClaw v2026.3.2 changed the build output location. Quick fix:
+
+```bash
+cd ~/tt-claw/adventure-games/scripts
+./fix-openclaw-wrapper.sh
+```
+
+This updates `~/openclaw/openclaw.sh` to use the correct path.
+
+**Solution 2: Build OpenClaw (if dist/ directory missing):**
 
 **Quick fix:**
 ```bash

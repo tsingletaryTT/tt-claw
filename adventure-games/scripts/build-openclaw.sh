@@ -73,15 +73,15 @@ if [ ! -d "$OPENCLAW_DIR/dist" ]; then
 fi
 
 # Verify index.js exists
-if [ ! -f "$OPENCLAW_DIR/dist/cli/index.js" ]; then
-    echo -e "${RED}ERROR: Build incomplete - dist/cli/index.js missing${NC}"
+if [ ! -f "$OPENCLAW_DIR/dist/index.js" ]; then
+    echo -e "${RED}ERROR: Build incomplete - dist/index.js missing${NC}"
     exit 1
 fi
 
 echo -e "${GREEN}✅ OpenClaw built successfully!${NC}"
 echo ""
 echo "Build output:"
-echo "  dist/cli/index.js: $(wc -l < "$OPENCLAW_DIR/dist/cli/index.js") lines"
+echo "  dist/index.js: $(wc -l < "$OPENCLAW_DIR/dist/index.js") lines"
 echo ""
 echo "Next steps:"
 echo "  cd ~/tt-claw/adventure-games/scripts"

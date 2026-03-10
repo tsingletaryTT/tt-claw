@@ -84,7 +84,7 @@ cat > "$OPENCLAW_DIR/openclaw.sh" << 'EOF'
 # OpenClaw wrapper script
 OPENCLAW_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$OPENCLAW_DIR"
-node dist/cli/index.js "$@"
+node dist/index.js "$@"
 EOF
 
 chmod +x "$OPENCLAW_DIR/openclaw.sh"
