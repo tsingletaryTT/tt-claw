@@ -51,6 +51,12 @@ for game in "${GAMES[@]}"; do
 AUTH_EOF
     echo "  ✓ Created auth-profiles.json"
 
+    # Copy models.json from main agent (has correct context window)
+    if [ -f "$OPENCLAW_AGENTS/main/agent/models.json" ]; then
+        cp "$OPENCLAW_AGENTS/main/agent/models.json" "$OPENCLAW_AGENTS/$game/agent/"
+        echo "  ✓ Copied models.json from main agent"
+    fi
+
     echo "  ✓ $game agent created"
     echo ""
 done
@@ -140,9 +146,9 @@ else:
         vllm_max = model.get("max_model_len", 65536)
 
         if model_size < 30:
-            # Small models (8B, 27B): cap at 16K for better quality
-            context_window = min(vllm_max, 16384)
-            reason = f"(capped at 16K for {model_size}B model quality)"
+            # Small models (8B, 27B): use vLLM's max (adventure game SOULs need 65K+)
+            context_window = vllm_max
+            reason = f"(using vLLM max {vllm_max} for {model_size}B model)"
         elif model_size < 70:
             # Medium models (30-69B): cap at 32K
             context_window = min(vllm_max, 32768)
