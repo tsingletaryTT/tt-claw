@@ -45,6 +45,68 @@ for game in "${GAMES[@]}"; do
     echo ""
 done
 
+# Step 3: Create main agent with vLLM-only configuration
+echo "📦 Creating main agent with vLLM-only model config..."
+mkdir -p "$OPENCLAW_AGENTS/main/agent"
+
+cat > "$OPENCLAW_AGENTS/main/agent/models.json" << 'MODELS_EOF'
+{
+  "providers": {
+    "vllm": {
+      "baseUrl": "http://127.0.0.1:8001/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-no-auth",
+      "models": [
+        {
+          "id": "meta-llama/Llama-3.1-8B-Instruct",
+          "name": "Llama 3.1 8B Instruct",
+          "reasoning": false,
+          "input": ["text"],
+          "contextWindow": 65536,
+          "maxTokens": 8192
+        }
+      ]
+    }
+  }
+}
+MODELS_EOF
+
+echo "  ✓ Created main agent with vLLM provider"
+echo "  ✓ Configured for local model only (no remote APIs)"
+echo ""
+
+# Step 4: Set global default model
+echo "📦 Configuring global default model..."
+if [ ! -f "$HOME/.openclaw/openclaw.json" ]; then
+    echo "  ⚠️  OpenClaw not configured yet"
+    echo "     Run: cd ~/openclaw && ./openclaw.sh config set gateway.mode local"
+else
+    python3 << 'PYEOF'
+import json
+from pathlib import Path
+
+config_path = Path.home() / ".openclaw" / "openclaw.json"
+with open(config_path) as f:
+    config = json.load(f)
+
+# Set default model to vllm
+if "agents" not in config:
+    config["agents"] = {}
+if "defaults" not in config["agents"]:
+    config["agents"]["defaults"] = {}
+if "model" not in config["agents"]["defaults"]:
+    config["agents"]["defaults"]["model"] = {}
+
+config["agents"]["defaults"]["model"]["primary"] = "vllm/meta-llama/Llama-3.1-8B-Instruct"
+
+with open(config_path, "w") as f:
+    json.dump(config, f, indent=4)
+
+print("  ✓ Set vllm/meta-llama/Llama-3.1-8B-Instruct as default")
+PYEOF
+fi
+echo ""
+
 echo "✅ All game agents created!"
 echo ""
 echo "Agents configured:"
