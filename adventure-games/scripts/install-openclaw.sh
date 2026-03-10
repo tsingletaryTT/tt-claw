@@ -31,6 +31,16 @@ fi
 
 echo "✓ Node.js $(node --version) found"
 echo "✓ npm $(npm --version) found"
+
+# Check for pnpm (required by OpenClaw)
+# We'll use npx to run pnpm without global installation
+if ! command -v pnpm &> /dev/null; then
+    echo "⚠️  pnpm not found - will use via npx"
+    PNPM="npx pnpm"
+else
+    echo "✓ pnpm $(pnpm --version) found"
+    PNPM="pnpm"
+fi
 echo ""
 
 # Check if OpenClaw already installed
@@ -59,11 +69,11 @@ rm openclaw.tar.gz
 
 echo ""
 echo "Installing dependencies (this may take a few minutes)..."
-npm install
+$PNPM install
 
 echo ""
 echo "Building OpenClaw (compiling TypeScript)..."
-npm run build
+$PNPM run build
 
 echo ""
 echo "Creating OpenClaw wrapper script..."

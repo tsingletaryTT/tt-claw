@@ -36,19 +36,28 @@ if [ ! -f "$OPENCLAW_DIR/package.json" ]; then
     exit 1
 fi
 
+# Check for pnpm (use npx if not globally installed)
+if ! command -v pnpm &> /dev/null; then
+    echo -e "${YELLOW}⚠️  pnpm not found - will use via npx${NC}"
+    PNPM="npx pnpm"
+    echo ""
+else
+    PNPM="pnpm"
+fi
+
 # Check if node_modules exists
 if [ ! -d "$OPENCLAW_DIR/node_modules" ]; then
     echo -e "${YELLOW}⚠️  Dependencies not installed${NC}"
     echo "Installing dependencies first..."
     cd "$OPENCLAW_DIR"
-    npm install
+    $PNPM install
     echo ""
 fi
 
 # Run build
 echo "Compiling TypeScript..."
 cd "$OPENCLAW_DIR"
-npm run build
+$PNPM run build
 
 echo ""
 

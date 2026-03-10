@@ -103,6 +103,7 @@ Before starting, verify you have:
 
 **Required:**
 - ✅ **Node.js 18+** - For OpenClaw
+- ✅ **pnpm** - Package manager (used via `npx` if not installed)
 - ✅ **Python 3.8+** - For adventure game tools
 - ✅ **Git** - For cloning repository
 
@@ -114,6 +115,7 @@ Check Node.js:
 ```bash
 node --version  # Should be v18.0.0 or higher
 npm --version   # Should be 8.0.0 or higher
+pnpm --version  # Will be installed automatically if missing
 ```
 
 If Node.js not installed:
@@ -163,8 +165,9 @@ cd ~/tt-claw/adventure-games/scripts
 **What this does:**
 - Downloads OpenClaw v2026.3.2
 - Installs to `~/openclaw/`
-- Runs `npm install` to get dependencies
-- **Runs `npm run build` to compile TypeScript** (REQUIRED!)
+- Uses `pnpm` (via `npx` if not globally installed - no sudo needed!)
+- Runs `pnpm install` to get dependencies
+- **Runs `pnpm run build` to compile TypeScript** (REQUIRED!)
 - Installs vLLM compatibility proxy
 - Creates wrapper script `~/openclaw/openclaw.sh`
 
@@ -172,6 +175,7 @@ cd ~/tt-claw/adventure-games/scripts
 ```
 ✓ Node.js v18.x.x found
 ✓ npm 8.x.x found
+✓ pnpm 8.x.x found (or installed)
 
 Downloading OpenClaw v2026.3.2...
 Installing dependencies (this may take a few minutes)...
@@ -415,8 +419,17 @@ This means OpenClaw wasn't built (TypeScript not compiled to JavaScript).
 **Quick fix:**
 ```bash
 cd ~/openclaw
-npm run build
+npx pnpm run build
 ```
+
+**If dependencies not installed:**
+```bash
+cd ~/openclaw
+npx pnpm install
+npx pnpm run build
+```
+
+**Note:** Using `npx pnpm` runs pnpm without requiring global installation (no sudo needed).
 
 **Expected output:**
 ```
