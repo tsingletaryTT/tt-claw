@@ -41,6 +41,16 @@ for game in "${GAMES[@]}"; do
         echo "  ⚠️  Warning: $GAMES_DIR/$game/tools.json not found"
     fi
 
+    # Create auth-profiles.json for game agent
+    cat > "$OPENCLAW_AGENTS/$game/agent/auth-profiles.json" << 'AUTH_EOF'
+{
+  "vllm": {
+    "apiKey": "sk-no-auth"
+  }
+}
+AUTH_EOF
+    echo "  ✓ Created auth-profiles.json"
+
     echo "  ✓ $game agent created"
     echo ""
 done
