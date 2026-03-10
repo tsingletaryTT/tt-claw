@@ -180,6 +180,9 @@ cd ~/tt-claw/adventure-games/scripts
 Downloading OpenClaw v2026.3.2...
 Installing dependencies (this may take a few minutes)...
 Building OpenClaw (compiling TypeScript)...
+Configuring OpenClaw for local mode...
+  ✓ Gateway mode set to local
+  ✓ OpenClaw configured
 Installing vLLM compatibility proxy...
 
 ✓ OpenClaw v2026.3.2 installed successfully!
@@ -196,6 +199,48 @@ ls -l ~/openclaw/openclaw.sh
 
 ~/openclaw/openclaw.sh --version
 # Should show: OpenClaw v2026.3.2
+
+# Check OpenClaw was configured
+cat ~/.openclaw/openclaw.json | grep mode
+# Should show: "mode": "local"
+```
+
+**Note:** The install script automatically configures OpenClaw for local mode. If this failed, see troubleshooting below.
+
+---
+
+### Step 2.5: Verify OpenClaw Configuration (Auto-configured)
+
+**This step is done automatically by install-openclaw.sh**, but verify it worked:
+
+```bash
+cat ~/.openclaw/openclaw.json
+```
+
+**Should show:**
+```json
+{
+  "gateway": {
+    "mode": "local"
+  },
+  ...
+}
+```
+
+**Why this matters:**
+- OpenClaw gateway requires `gateway.mode` to be set
+- Without it, gateway exits immediately with: "Missing config"
+- `local` mode = no cloud connection (games run locally)
+
+**If config is missing:**
+```bash
+cd ~/openclaw
+./openclaw.sh config set gateway.mode local
+```
+
+**Expected output:**
+```
+Updated gateway.mode. Restart the gateway to apply.
 ```
 
 ---
@@ -408,11 +453,12 @@ chmod +x ~/.openclaw/skills/*
 - Error in `/tmp/openclaw-gateway.log`
 
 **Causes:**
-1. **Wrong path in wrapper script** (OpenClaw v2026.3.2 uses `dist/index.js` not `dist/cli/index.js`)
-2. **OpenClaw not built** - `dist/` directory missing
-3. Port 18789 already in use
-4. Previous gateway still running
-5. Dependencies not installed
+1. **Missing configuration** - Gateway mode not set (most common!)
+2. **Wrong path in wrapper script** (OpenClaw v2026.3.2 uses `dist/index.js` not `dist/cli/index.js`)
+3. **OpenClaw not built** - `dist/` directory missing
+4. Port 18789 already in use
+5. Previous gateway still running
+6. Dependencies not installed
 
 **Solution 1: Fix wrapper script (if you see dist/cli/index.js error):**
 

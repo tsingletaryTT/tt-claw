@@ -90,6 +90,24 @@ EOF
 chmod +x "$OPENCLAW_DIR/openclaw.sh"
 
 echo ""
+echo "Configuring OpenClaw for local mode..."
+
+# Set gateway mode (required for gateway to start)
+if "$OPENCLAW_DIR/openclaw.sh" config set gateway.mode local > /dev/null 2>&1; then
+    echo "  ✓ Gateway mode set to local"
+else
+    echo "  ⚠️  Could not set gateway mode automatically"
+    echo "     You may need to run: cd $OPENCLAW_DIR && ./openclaw.sh config set gateway.mode local"
+fi
+
+# Verify config was created
+if [ -f "$HOME/.openclaw/openclaw.json" ]; then
+    echo "  ✓ OpenClaw configured"
+else
+    echo "  ⚠️  Config not created - gateway may not start"
+fi
+
+echo ""
 echo "Installing vLLM compatibility proxy..."
 
 # Find the tt-claw repo to get the proxy script
