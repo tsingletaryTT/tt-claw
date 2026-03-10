@@ -274,6 +274,25 @@ for game in "${GAMES[@]}"; do
     fi
 done
 
+# Step 5: Seed initial memory (adventure already begun)
+echo ""
+echo "📦 Seeding initial memory..."
+MEMORY_TEMPLATES="$GAMES_DIR/../memory-templates"
+DATE=$(date +%Y-%m-%d)
+
+for game in "${GAMES[@]}"; do
+    memory_dir="$HOME/.openclaw/workspace-$game/memory"
+    template="$MEMORY_TEMPLATES/${game}-start.md"
+
+    if [ -f "$template" ]; then
+        mkdir -p "$memory_dir"
+        cp "$template" "$memory_dir/$DATE.md"
+        echo "  ✓ Seeded $game memory ($DATE.md)"
+    else
+        echo "  ⚠️  No memory template for $game"
+    fi
+done
+
 echo ""
 
 echo "✅ All game agents created and registered!"
