@@ -232,7 +232,45 @@ PYEOF
 
 echo ""
 
-echo "✅ All game agents created!"
+# Step 4: Register agents with OpenClaw
+echo "📦 Registering game agents with OpenClaw..."
+
+# Auto-detect OpenClaw directory
+if [ -n "$OPENCLAW_HOME" ]; then
+    OPENCLAW_DIR="$OPENCLAW_HOME"
+elif [ -d "$HOME/openclaw" ]; then
+    OPENCLAW_DIR="$HOME/openclaw"
+else
+    echo "  ⚠️  OpenClaw not found (set OPENCLAW_HOME or install to ~/openclaw)"
+    echo "  Skip agent registration - you can register manually later"
+    echo ""
+    echo "✅ Agent files created (registration skipped)"
+    echo ""
+    echo "To register agents manually:"
+    echo "  cd ~/openclaw"
+    for game in chip-quest terminal-dungeon conference-chaos; do
+        echo "  ./openclaw.sh agents add $game --agent-dir ~/.openclaw/agents/$game/agent --workspace ~/.openclaw/workspace-$game --model vllm/meta-llama/Llama-3.1-8B-Instruct"
+    done
+    exit 0
+fi
+
+for game in "${GAMES[@]}"; do
+    echo "  Registering $game..."
+    "$OPENCLAW_DIR/openclaw.sh" agents add "$game" \
+        --agent-dir "$HOME/.openclaw/agents/$game/agent" \
+        --workspace "$HOME/.openclaw/workspace-$game" \
+        --model "vllm/meta-llama/Llama-3.1-8B-Instruct" > /dev/null 2>&1
+
+    if [ $? -eq 0 ]; then
+        echo "    ✓ $game registered"
+    else
+        echo "    ⚠️  $game registration failed (may already exist)"
+    fi
+done
+
+echo ""
+
+echo "✅ All game agents created and registered!"
 echo ""
 echo "Agents configured:"
 echo "  • chip-quest (818 lines) - Educational TT architecture adventure"
@@ -242,9 +280,16 @@ echo ""
 echo "Each agent has:"
 echo "  • SOUL.md - Complete game master personality (500-700 lines)"
 echo "  • tools.json - Tool integration hints"
+echo "  • Registered with OpenClaw (workspace + sessions)"
 echo ""
 echo "Skills installed:"
 ls -1 "$HOME/.openclaw/skills"
 echo ""
+echo "OpenClaw agents registered:"
+cd "$OPENCLAW_DIR" && ./openclaw.sh agents list | grep -E "^-" | sed 's/^/  /'
+echo ""
 echo "Next step: Launch adventure menu"
 echo "  cd $SCRIPT_DIR && ./adventure-menu.sh"
+echo ""
+echo "Or test individual game:"
+echo "  cd $OPENCLAW_DIR && ./openclaw.sh tui --session agent:chip-quest:main --message 'start the adventure'"

@@ -225,7 +225,8 @@ launch_game() {
 
     cd "$OPENCLAW_DIR"
     # Launch TUI with initial message to trigger the game's starting prompt
-    ./openclaw.sh tui --session "$agent_id" --message "start the adventure"
+    # Session key format: agent:<agent-id>:main to route to the correct agent
+    ./openclaw.sh tui --session "agent:${agent_id}:main" --message "start the adventure"
 }
 
 # Show service management menu
