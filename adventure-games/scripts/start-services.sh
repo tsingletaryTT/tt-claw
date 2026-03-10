@@ -4,7 +4,17 @@
 
 set -e
 
-OPENCLAW_DIR="/home/ttclaw/openclaw"
+# Auto-detect OpenClaw installation
+if [ -n "$OPENCLAW_HOME" ]; then
+    OPENCLAW_DIR="$OPENCLAW_HOME"
+elif [ -d "$HOME/openclaw" ]; then
+    OPENCLAW_DIR="$HOME/openclaw"
+else
+    echo -e "\033[0;31mERROR: OpenClaw not found.\033[0m"
+    echo "Set OPENCLAW_HOME environment variable or install to ~/openclaw"
+    exit 1
+fi
+
 PROXY_LOG="/tmp/openclaw-proxy.log"
 GATEWAY_LOG="/tmp/openclaw-gateway.log"
 PROXY_PID_FILE="/tmp/openclaw-proxy.pid"

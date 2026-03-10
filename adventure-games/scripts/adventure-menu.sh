@@ -4,8 +4,17 @@
 
 set -e
 
-OPENCLAW_DIR="/home/ttclaw/openclaw"
-SHARED_DIR="/home/ttclaw/.openclaw/shared"
+# Auto-detect OpenClaw installation
+if [ -n "$OPENCLAW_HOME" ]; then
+    OPENCLAW_DIR="$OPENCLAW_HOME"
+elif [ -d "$HOME/openclaw" ]; then
+    OPENCLAW_DIR="$HOME/openclaw"
+else
+    echo "ERROR: OpenClaw not found. Set OPENCLAW_HOME or install to ~/openclaw"
+    exit 1
+fi
+
+SHARED_DIR="$HOME/.openclaw/shared"
 
 # Colors for better UX
 CYAN='\033[0;36m'
@@ -142,7 +151,7 @@ show_status() {
     echo -e "${CYAN}Available Games${NC}"
     echo ""
     for agent in chip-quest terminal-dungeon conference-chaos; do
-        SOUL_FILE="/home/ttclaw/.openclaw/agents/$agent/agent/SOUL.md"
+        SOUL_FILE="$HOME/.openclaw/agents/$agent/agent/SOUL.md"
         if [ -f "$SOUL_FILE" ]; then
             SIZE=$(stat -c%s "$SOUL_FILE" 2>/dev/null || echo "0")
             KB=$((SIZE / 1024))

@@ -75,7 +75,7 @@ check_agents() {
 
     local all_ok=true
     for agent in chip-quest terminal-dungeon conference-chaos; do
-        local soul_file="/home/ttclaw/.openclaw/agents/$agent/agent/SOUL.md"
+        local soul_file="$HOME/.openclaw/agents/$agent/agent/SOUL.md"
         echo -ne "    $agent: "
 
         if [ -f "$soul_file" ]; then
@@ -101,7 +101,7 @@ check_agents() {
 check_model_config() {
     echo -ne "  Model Configuration........... "
 
-    local config_file="/home/ttclaw/.openclaw/openclaw.json"
+    local config_file="$HOME/.openclaw/openclaw.json"
     if [ ! -f "$config_file" ]; then
         echo -e "${RED}✗ Config file missing${NC}"
         EXIT_CODE=5
@@ -112,7 +112,7 @@ check_model_config() {
     local model=$(python3 << 'PYEOF'
 import json
 try:
-    with open("/home/ttclaw/.openclaw/openclaw.json") as f:
+    with open("$HOME/.openclaw/openclaw.json") as f:
         config = json.load(f)
         model = config.get("agents", {}).get("defaults", {}).get("model", {}).get("primary", "Not configured")
         print(model)

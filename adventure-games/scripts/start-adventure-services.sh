@@ -4,7 +4,17 @@
 
 set -e
 
-OPENCLAW_DIR="$HOME/openclaw"
+# Auto-detect OpenClaw installation
+if [ -n "$OPENCLAW_HOME" ]; then
+    OPENCLAW_DIR="$OPENCLAW_HOME"
+elif [ -d "$HOME/openclaw" ]; then
+    OPENCLAW_DIR="$HOME/openclaw"
+else
+    echo -e "\033[0;31mERROR: OpenClaw not found.\033[0m"
+    echo "Set OPENCLAW_HOME environment variable or install to ~/openclaw"
+    exit 1
+fi
+
 LOG_DIR="/tmp"
 
 # Colors
