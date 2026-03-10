@@ -121,12 +121,35 @@ else:
         # Use model name as display name (last part after /)
         display_name = model_id.split("/")[-1] if "/" in model_id else model_id
 
+        # Extract model size for context window decisions
+        import re
+        size_match = re.search(r'(\d+)b', model_id.lower())
+        model_size = int(size_match.group(1)) if size_match else 8
+
+        # Smart context window sizing based on model size
+        vllm_max = model.get("max_model_len", 65536)
+
+        if model_size < 30:
+            # Small models (8B, 27B): cap at 16K for better quality
+            context_window = min(vllm_max, 16384)
+            reason = f"(capped at 16K for {model_size}B model quality)"
+        elif model_size < 70:
+            # Medium models (30-69B): cap at 32K
+            context_window = min(vllm_max, 32768)
+            reason = f"(capped at 32K for {model_size}B model)"
+        else:
+            # Large models (70B+): use vLLM's max
+            context_window = vllm_max
+            reason = f"(using vLLM max for {model_size}B model)"
+
+        print(f"    {model_id}: {context_window:,} tokens {reason}")
+
         openclaw_models.append({
             "id": model_id,
             "name": display_name,
             "reasoning": False,
             "input": ["text"],
-            "contextWindow": model.get("max_model_len", 65536),
+            "contextWindow": context_window,
             "maxTokens": 8192
         })
 

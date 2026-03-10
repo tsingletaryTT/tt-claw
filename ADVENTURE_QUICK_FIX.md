@@ -74,7 +74,7 @@ def detect_vllm_models():
           "name": "Llama-3.1-8B-Instruct",
           "reasoning": false,
           "input": ["text"],
-          "contextWindow": 65536,
+          "contextWindow": 16384,
           "maxTokens": 8192
         }
       ]
@@ -83,13 +83,41 @@ def detect_vllm_models():
 }
 ```
 
-**Note:** Model ID, context window, and other details are **auto-detected** from vLLM, not hardcoded!
+**Note:** Model ID and context window are **auto-detected** from vLLM:
+- Context window is **intelligently capped** based on model size (16K for 8B models)
+- vLLM may serve 65K max, but we cap at 16K for better quality in small models
+
+### Smart Context Window Sizing
+
+**Problem:** Large context windows can degrade quality in smaller models.
+
+**Solution:** Cap context windows based on model size for optimal performance:
+
+| Model Size | Context Window | Reason |
+|------------|----------------|--------|
+| < 30B      | 16K (16,384)   | Better quality for small models |
+| 30-69B     | 32K (32,768)   | Balanced for medium models |
+| ≥ 70B      | vLLM max       | Large models handle full context |
+
+**Examples:**
+```
+Llama-3.1-8B-Instruct:     16,384 tokens (capped at 16K for 8B model quality)
+Qwen3.5-27B:               16,384 tokens (capped at 16K for 27B model quality)
+Qwen3.5-35B:               32,768 tokens (capped at 32K for 35B model)
+Llama-3.3-70B-Instruct:    65,536 tokens (using vLLM max for 70B model)
+DeepSeek-R1-70B:           65,536 tokens (using vLLM max for 70B model)
+```
+
+**Why this matters:**
+- Small models (8B): Perform better with shorter context (less confusion)
+- Medium models (35B): Can handle moderate context (32K)
+- Large models (70B+): Can use full context effectively (65K+)
 
 ### Benefits
 
 ✅ **Works with any model** - 8B, 70B, or custom models
 ✅ **No hardcoding** - Adapts to whatever vLLM is serving
-✅ **Accurate context windows** - Uses actual `max_model_len` from vLLM
+✅ **Smart context windows** - Caps based on model size for quality
 ✅ **Multi-model support** - Detects all available models
 ✅ **Smart selection** - Picks best model automatically
 ✅ **Fallback handling** - Works even if vLLM isn't running yet
