@@ -117,7 +117,27 @@ else
     sleep 3
     if ! pgrep -f "openclaw.*gateway" > /dev/null; then
         echo -e "  ${RED}ERROR: Gateway failed to start!${NC}"
-        echo "  Logs: tail $LOG_DIR/openclaw-gateway.log"
+        echo ""
+        echo "  Common causes:"
+
+        # Check if dist directory exists
+        if [ ! -d "$OPENCLAW_DIR/dist" ]; then
+            echo -e "  ${YELLOW}✗ OpenClaw not built (dist/ missing)${NC}"
+            echo "    Fix: cd $OPENCLAW_DIR && npm run build"
+        fi
+
+        # Check if node_modules exists
+        if [ ! -d "$OPENCLAW_DIR/node_modules" ]; then
+            echo -e "  ${YELLOW}✗ Dependencies not installed${NC}"
+            echo "    Fix: cd $OPENCLAW_DIR && npm install"
+        fi
+
+        echo ""
+        echo "  Full logs: tail $LOG_DIR/openclaw-gateway.log"
+        echo ""
+        echo "  Quick fix: Reinstall OpenClaw"
+        echo "    cd ~/tt-claw/adventure-games/scripts && ./install-openclaw.sh"
+
         kill $GATEWAY_PID 2>/dev/null || true
         exit 1
     fi

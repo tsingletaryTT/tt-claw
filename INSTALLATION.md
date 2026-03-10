@@ -164,6 +164,8 @@ cd ~/tt-claw/adventure-games/scripts
 - Downloads OpenClaw v2026.3.2
 - Installs to `~/openclaw/`
 - Runs `npm install` to get dependencies
+- **Runs `npm run build` to compile TypeScript** (REQUIRED!)
+- Installs vLLM compatibility proxy
 - Creates wrapper script `~/openclaw/openclaw.sh`
 
 **Expected output:**
@@ -173,6 +175,8 @@ cd ~/tt-claw/adventure-games/scripts
 
 Downloading OpenClaw v2026.3.2...
 Installing dependencies (this may take a few minutes)...
+Building OpenClaw (compiling TypeScript)...
+Installing vLLM compatibility proxy...
 
 ✓ OpenClaw v2026.3.2 installed successfully!
 
@@ -393,12 +397,47 @@ chmod +x ~/.openclaw/skills/*
 
 ### Problem: OpenClaw gateway won't start
 
-**Causes:**
-1. Port 18789 already in use
-2. Previous gateway still running
-3. OpenClaw not installed correctly
+**Symptoms:**
+- `Cannot find module '/home/ttclaw/openclaw/dist/cli/index.js'`
+- Gateway process exits immediately
+- Error in `/tmp/openclaw-gateway.log`
 
-**Solution:**
+**Causes:**
+1. **OpenClaw not built** (most common) - `dist/` directory missing
+2. Port 18789 already in use
+3. Previous gateway still running
+4. Dependencies not installed
+
+**Solution for "Cannot find module dist/cli/index.js":**
+
+This means OpenClaw wasn't built (TypeScript not compiled to JavaScript).
+
+**Quick fix:**
+```bash
+cd ~/openclaw
+npm run build
+```
+
+**Expected output:**
+```
+> @openclaw/cli@2026.3.2 build
+> tsc && tsc-alias
+```
+
+**Verify:**
+```bash
+ls ~/openclaw/dist/cli/index.js
+# Should exist now
+```
+
+**Permanent fix - Reinstall OpenClaw:**
+```bash
+cd ~/tt-claw/adventure-games/scripts
+./install-openclaw.sh
+# Now includes build step!
+```
+
+**Other solutions:**
 ```bash
 # Kill existing gateway
 pkill -f openclaw-gateway

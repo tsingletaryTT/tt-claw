@@ -62,6 +62,10 @@ echo "Installing dependencies (this may take a few minutes)..."
 npm install
 
 echo ""
+echo "Building OpenClaw (compiling TypeScript)..."
+npm run build
+
+echo ""
 echo "Creating OpenClaw wrapper script..."
 
 # Create wrapper script
