@@ -76,6 +76,28 @@ EOF
 chmod +x "$OPENCLAW_DIR/openclaw.sh"
 
 echo ""
+echo "Installing vLLM compatibility proxy..."
+
+# Find the tt-claw repo to get the proxy script
+TTCLAW_REPO=""
+if [ -d "$HOME/tt-claw" ]; then
+    TTCLAW_REPO="$HOME/tt-claw"
+elif [ -d "$(dirname "$(dirname "$0")")/../.." ]; then
+    # We're running from tt-claw/adventure-games/scripts
+    TTCLAW_REPO="$(cd "$(dirname "$0")/../.." && pwd)"
+fi
+
+if [ -n "$TTCLAW_REPO" ] && [ -f "$TTCLAW_REPO/openclaw-proxy/vllm-proxy.py" ]; then
+    cp "$TTCLAW_REPO/openclaw-proxy/vllm-proxy.py" "$OPENCLAW_DIR/"
+    chmod +x "$OPENCLAW_DIR/vllm-proxy.py"
+    echo "  ✓ Installed vllm-proxy.py"
+else
+    echo "  ⚠️  Could not find vllm-proxy.py in tt-claw repo"
+    echo "     You'll need to copy it manually from:"
+    echo "     ~/tt-claw/openclaw-proxy/vllm-proxy.py → $OPENCLAW_DIR/"
+fi
+
+echo ""
 echo "✓ OpenClaw $OPENCLAW_VERSION installed successfully!"
 echo ""
 echo "Installation directory: $OPENCLAW_DIR"
