@@ -196,13 +196,23 @@ with open(auth_profiles_path, "w") as f:
 
 print("  ✓ Created auth-profiles.json (API key for vLLM provider)")
 
-# Set global default if we have a best model
-if best_model:
+# Set global config if we have detected models
+if detected_models and best_model:
     config_path = Path.home() / ".openclaw" / "openclaw.json"
     if config_path.exists():
         with open(config_path) as f:
             global_config = json.load(f)
 
+        # Add models.providers section (CRITICAL for OpenClaw)
+        if "models" not in global_config:
+            global_config["models"] = {}
+        if "providers" not in global_config["models"]:
+            global_config["models"]["providers"] = {}
+
+        # Copy provider config from main agent to global
+        global_config["models"]["providers"]["vllm"] = config["providers"]["vllm"]
+
+        # Set default model
         if "agents" not in global_config:
             global_config["agents"] = {}
         if "defaults" not in global_config["agents"]:
@@ -215,6 +225,7 @@ if best_model:
         with open(config_path, "w") as f:
             json.dump(global_config, f, indent=4)
 
+        print(f"  ✓ Added vllm provider to global config")
         print(f"  ✓ Set default: vllm/{best_model['id']}")
 
 PYEOF
