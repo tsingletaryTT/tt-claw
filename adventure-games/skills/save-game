@@ -1,0 +1,4 @@
+#!/bin/bash
+# Save/load game state to disk
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+python3 "$SCRIPT_DIR/../tools/save_game.py" "$@"

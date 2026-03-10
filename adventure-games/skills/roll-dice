@@ -1,0 +1,4 @@
+#!/bin/bash
+# Roll dice using standard notation (e.g., 3d6, 2d6+3)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+python3 "$SCRIPT_DIR/../tools/dice.py" roll "$@"

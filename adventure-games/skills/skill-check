@@ -1,0 +1,4 @@
+#!/bin/bash
+# GURPS skill check (roll 3d6 vs target skill)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+python3 "$SCRIPT_DIR/../tools/dice.py" check "$@"

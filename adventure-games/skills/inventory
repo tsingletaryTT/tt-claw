@@ -1,0 +1,4 @@
+#!/bin/bash
+# Manage inventory (add, remove, equip items)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+python3 "$SCRIPT_DIR/../tools/inventory.py" "$@"

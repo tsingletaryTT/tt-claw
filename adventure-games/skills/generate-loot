@@ -1,0 +1,4 @@
+#!/bin/bash
+# Generate loot by rarity (common, uncommon, rare, epic, legendary)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+python3 "$SCRIPT_DIR/../tools/dice.py" loot "$@"
