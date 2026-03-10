@@ -59,7 +59,12 @@ def detect_vllm_models():
 
 ### Generated Config
 
-**File:** `~/.openclaw/agents/main/agent/models.json`
+**Files Created:**
+
+1. `~/.openclaw/agents/main/agent/models.json` - Model definitions
+2. `~/.openclaw/agents/main/agent/auth-profiles.json` - API keys
+
+**File 1:** `~/.openclaw/agents/main/agent/models.json`
 
 ```json
 {
@@ -220,3 +225,20 @@ Potential improvements:
 **Status:** ✅ Implemented and tested
 **Updated:** March 10, 2026
 **Script:** `adventure-games/scripts/setup-game-agents.sh`
+
+**File 2:** `~/.openclaw/agents/main/agent/auth-profiles.json`
+
+```json
+{
+  "vllm": {
+    "apiKey": "sk-no-auth"
+  }
+}
+```
+
+**Why both files?**
+- `models.json` defines providers and models
+- `auth-profiles.json` stores API keys per provider
+- OpenClaw checks both locations for authentication
+- vLLM runs with `--no-auth` so dummy key works
+

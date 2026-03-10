@@ -174,6 +174,18 @@ with open(models_path, "w") as f:
 
 print(f"  ✓ Created models.json with {len(config['providers']['vllm']['models'])} model(s)")
 
+# Save auth-profiles.json (OpenClaw also checks this for API keys)
+auth_profiles_path = Path.home() / ".openclaw" / "agents" / "main" / "agent" / "auth-profiles.json"
+auth_profiles = {
+    "vllm": {
+        "apiKey": "sk-no-auth"
+    }
+}
+with open(auth_profiles_path, "w") as f:
+    json.dump(auth_profiles, f, indent=2)
+
+print("  ✓ Created auth-profiles.json (API key for vLLM provider)")
+
 # Set global default if we have a best model
 if best_model:
     config_path = Path.home() / ".openclaw" / "openclaw.json"
