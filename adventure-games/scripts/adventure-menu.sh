@@ -33,23 +33,37 @@ auto_detect_model() {
     # Check for environment override
     if [ -n "$OPENCLAW_MODEL" ]; then
         echo -e "${CYAN}🎯 Using override: $OPENCLAW_MODEL${NC}"
-        python3 "$OPENCLAW_DIR/detect-model.py" --quiet > /dev/null 2>&1
         return 0
     fi
 
-    # Run detection with progress
-    python3 "$OPENCLAW_DIR/detect-model.py" --progress 2>&1 | grep -v "^=" || true
+    # Try to detect model from vLLM if available
+    if curl -s http://127.0.0.1:8001/v1/models > /dev/null 2>&1; then
+        local MODEL=$(curl -s http://127.0.0.1:8001/v1/models 2>/dev/null | python3 -c "import sys, json; data=json.load(sys.stdin); print(data['data'][0]['id'] if data.get('data') else '')" 2>/dev/null || echo "")
+        if [ -n "$MODEL" ]; then
+            echo -e "${CYAN}🎯 Detected model: $MODEL${NC}"
+        fi
+    fi
     return 0
 }
 
 # Check if vLLM proxy is running (non-blocking)
 check_proxy() {
-    if ! curl -s http://127.0.0.1:8001/v1/models > /dev/null 2>&1; then
-        echo -e "${YELLOW}⚠️  vLLM proxy not detected on port 8001${NC}"
-        echo -e "   ${CYAN}Tip: Start with ./start-services.sh${NC}"
+    if ! timeout 3 curl -s http://127.0.0.1:8001/v1/models > /dev/null 2>&1; then
+        echo -e "${YELLOW}⚠️  vLLM proxy not responding on port 8001${NC}"
+        echo -e "   ${CYAN}Why needed:${NC} Strips incompatible API fields from OpenClaw requests"
+        echo -e "   ${CYAN}Fix: ${NC}"
+
+        # Check if vLLM backend is running
+        if timeout 3 curl -s http://127.0.0.1:8000/health > /dev/null 2>&1; then
+            echo -e "      ${GREEN}✓ vLLM backend is running (port 8000)${NC}"
+            echo -e "      ${YELLOW}→ Start proxy:${NC} cd ~/openclaw && python3 vllm-proxy.py"
+        else
+            echo -e "      ${RED}✗ vLLM backend not running (port 8000)${NC}"
+            echo -e "      ${YELLOW}→ Start vLLM first, then proxy${NC}"
+        fi
         return 1
     else
-        echo -e "${GREEN}✓ vLLM proxy detected${NC}"
+        echo -e "${GREEN}✓ vLLM proxy responding${NC}"
         return 0
     fi
 }
@@ -58,10 +72,12 @@ check_proxy() {
 check_gateway() {
     if ! pgrep -f "openclaw.*gateway" > /dev/null; then
         echo -e "${YELLOW}⚠️  OpenClaw gateway not running${NC}"
-        echo -e "   ${CYAN}Tip: Start with ./start-services.sh${NC}"
+        echo -e "   ${CYAN}Why needed:${NC} WebSocket server that handles game agent communication"
+        echo -e "   ${CYAN}Fix:${NC} cd ~/openclaw && ./openclaw.sh gateway run"
+        echo -e "   ${CYAN}Or:${NC} Use Service Management menu (option 0)"
         return 1
     else
-        echo -e "${GREEN}✓ OpenClaw gateway running${NC}"
+        echo -e "${GREEN}✓ OpenClaw gateway running (port 18789)${NC}"
         return 0
     fi
 }

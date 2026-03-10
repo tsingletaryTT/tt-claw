@@ -20,9 +20,78 @@ cd adventure-games/scripts
 # 3. Setup game agents and skills
 ./setup-game-agents.sh
 
-# 4. Launch adventure menu
+# 4. Start services (vLLM proxy + OpenClaw gateway)
+./start-adventure-services.sh
+
+# 5. Launch adventure menu
 ./adventure-menu.sh
 ```
+
+**⚠️ IMPORTANT:** You need services running before games will work!
+See [Service Startup](#service-startup-required) for details.
+
+---
+
+## Service Startup (REQUIRED)
+
+**Before playing games, you need 3 services running:**
+
+### 1. vLLM Server (port 8000) ✅
+AI inference backend. Usually started once and left running.
+
+**Check:**
+```bash
+curl http://localhost:8000/health
+```
+
+**If not running, start it** (see [Optional: vLLM Server Setup](#optional-vllm-server-setup))
+
+### 2. vLLM Proxy (port 8001) 🔧
+**What it does:** Strips incompatible API fields from OpenClaw requests
+**Why needed:** OpenClaw v2026.3.2 sends `strict`/`store` fields that vLLM doesn't support
+
+**Start manually:**
+```bash
+cd ~/openclaw
+python3 vllm-proxy.py
+```
+
+### 3. OpenClaw Gateway (port 18789) 🚪
+**What it does:** WebSocket server managing game agent sessions
+
+**Start manually:**
+```bash
+cd ~/openclaw
+./openclaw.sh gateway run
+```
+
+### Quick Start All Services
+
+**Automated script:**
+```bash
+cd ~/tt-claw/adventure-games/scripts
+./start-adventure-services.sh
+```
+
+This will:
+1. Check vLLM is running (exit if not)
+2. Start proxy in background
+3. Start gateway in background
+4. Show you service status and log locations
+
+**Manual multi-terminal approach:**
+```bash
+# Terminal 1: Proxy
+cd ~/openclaw && python3 vllm-proxy.py
+
+# Terminal 2: Gateway
+cd ~/openclaw && ./openclaw.sh gateway run
+
+# Terminal 3: Adventure Menu
+cd ~/tt-claw/adventure-games/scripts && ./adventure-menu.sh
+```
+
+**For more details:** See `START_SERVICES.md` in repository root
 
 ---
 
