@@ -166,8 +166,10 @@ tt-claw/
 │   │   ├── OPENCLAW_MEMORY_SEARCH_SETUP.md
 │   │   ├── SYSTEM_PROMPT_CONFIGURATION.md
 │   │   ├── SYSTEM_PROMPT_FIX_V2.md
+│   │   ├── SYSTEM_PROMPT_FIX_V3.md
 │   │   ├── VLLM_TOOL_CALLING_COMMAND.md
-│   │   └── system-prompt-v2.md
+│   │   ├── system-prompt-v2.md
+│   │   └── system-prompt-v3.md
 │   └── archive/             # Historical docs
 ├── CLAUDE.md                # Complete development journey
 └── README.md                # You are here
@@ -180,6 +182,7 @@ tt-claw/
 - **[Quick Reference](docs/openclaw/OPENCLAW_MEMORY_QUICK_REF.md)** - Common commands and queries
 - **[System Prompt Config](docs/openclaw/SYSTEM_PROMPT_CONFIGURATION.md)** - Agent behavior configuration
 - **[System Prompt Fix v2](docs/openclaw/SYSTEM_PROMPT_FIX_V2.md)** - Preventing tool narration
+- **[System Prompt Fix v3](docs/openclaw/SYSTEM_PROMPT_FIX_V3.md)** - Ultra-direct prompt for 8B model limitations
 - **[vLLM Tool Calling](docs/openclaw/VLLM_TOOL_CALLING_COMMAND.md)** - Docker command with tool support
 
 ### Integration Journey
@@ -271,6 +274,68 @@ sleep 2
 pkill -f openclaw-gateway
 ./openclaw.sh gateway run
 ```
+
+## Known Limitations
+
+### 8B Model Meta-Narration Issue ⚠️
+
+**Problem:** Llama-3.1-8B-Instruct may narrate tool usage instead of answering directly.
+
+**Example of the issue:**
+```
+User: "Tell me about compiling tt-metal"
+
+Agent (8B, incorrect): "Based on the memory search results, it seems that
+the user is looking for information about compiling tt-metal. To provide
+a more direct answer, you could use the memory_get function..."
+
+Agent (70B, correct): "To compile tt-metal, you need Python 3.11 and
+clang-17 as prerequisites. First install these dependencies, then run
+the build command. [Source: forge-image-classification.md]"
+```
+
+**Why this happens:**
+- 8B models struggle with complex behavioral constraints
+- They often **describe** what they should do rather than just doing it
+- This is a documented limitation of smaller instruction-tuned models
+- The agent meta-analyzes the task instead of executing it
+
+**What we've tried:**
+- ✅ v1 system prompt with examples
+- ✅ v2 prompt with explicit "NEVER say X" anti-patterns
+- ✅ v3 ultra-direct prompt with behavioral imperatives and mental model framing
+- ⚠️ 8B model may simply lack capacity for this constraint
+
+**Solution: Use 70B Model for Production**
+
+For booth demos and production use, **strongly recommend Llama-3.3-70B-Instruct**:
+- ✅ Reliable instruction following
+- ✅ No meta-narration issues
+- ✅ Better answer quality
+- ✅ More comprehensive responses
+- ✅ Handles complex behavioral constraints
+
+See **[CLAUDE.md](CLAUDE.md)** section "Llama-3.3-70B Upgrade" for deployment instructions.
+
+**Workaround for 8B (if needed):**
+```bash
+# Install v3 ultra-direct prompt
+sudo cp /tmp/openclaw-system-prompt-v3.md ~/.openclaw/agents/main/agent/system.md
+
+# Restart gateway
+sudo pkill -f openclaw-gateway
+sudo -u ttclaw bash -c 'cd ~/openclaw && ./openclaw.sh gateway run &'
+
+# Start FRESH TUI
+sudo -u ttclaw ~/openclaw/openclaw.sh tui
+```
+
+**Check prompt version:**
+```bash
+check-openclaw-prompt
+```
+
+**Acceptance:** If 8B still narrates after v3 prompt, this is a model limitation. Upgrade to 70B or brief presenters on this behavior.
 
 ## Related Repositories
 

@@ -25,8 +25,26 @@ echo ""
 echo "🔍 Version Detection:"
 echo ""
 
-if sudo grep -q "CRITICAL: What NOT to Do" "$PROMPT_FILE"; then
-    echo "✅ Enhanced v2 prompt detected"
+if sudo grep -q "You are a human expert who happens to have perfect memory" "$PROMPT_FILE"; then
+    echo "✅ Ultra-direct v3 prompt detected"
+    echo "   - Has 'Absolute Rules' section"
+    echo "   - Has 'Mental Model' framing"
+    echo "   - Behavioral imperatives (not just examples)"
+
+    if sudo grep -q "NEVER EVER do these things" "$PROMPT_FILE"; then
+        echo "   - Has strengthened 'NEVER EVER' commands ✅"
+    fi
+
+    echo ""
+    echo "🎯 Expected Behavior:"
+    echo "   Agent answers as an expert with perfect memory,"
+    echo "   NOT narrating process or suggesting tool calls"
+    echo ""
+    echo "⚠️  Note: If agent still narrates with 8B model,"
+    echo "   consider upgrading to Llama-3.3-70B-Instruct"
+
+elif sudo grep -q "CRITICAL: What NOT to Do" "$PROMPT_FILE"; then
+    echo "⚠️  Enhanced v2 prompt detected (may not be enough)"
     echo "   - Has 'CRITICAL: What NOT to Do' section"
     echo "   - Explicitly prevents tool narration"
 
@@ -42,17 +60,20 @@ if sudo grep -q "CRITICAL: What NOT to Do" "$PROMPT_FILE"; then
     echo "🎯 Expected Behavior:"
     echo "   Agent should answer directly using memory content,"
     echo "   NOT say 'The memory_get function has returned...'"
+    echo ""
+    echo "💡 Upgrade to v3 with:"
+    echo "   sudo cp /tmp/openclaw-system-prompt-v3.md $PROMPT_FILE"
 
 elif sudo grep -q "Don't just say.*I found this" "$PROMPT_FILE"; then
     echo "⚠️  Original v1 prompt detected"
     echo "   - Has basic examples but no explicit anti-patterns"
     echo "   - May still narrate tool usage"
     echo ""
-    echo "💡 Upgrade to v2 with:"
-    echo "   sudo cp /tmp/openclaw-system-prompt-v2.md $PROMPT_FILE"
+    echo "💡 Upgrade to v3 with:"
+    echo "   sudo cp /tmp/openclaw-system-prompt-v3.md $PROMPT_FILE"
 else
     echo "❓ Unknown prompt version"
-    echo "   - Doesn't match v1 or v2 signatures"
+    echo "   - Doesn't match v1, v2, or v3 signatures"
 fi
 
 echo ""
