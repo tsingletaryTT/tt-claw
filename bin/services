@@ -1,0 +1,74 @@
+#!/bin/bash
+# Start OpenClaw services with portable config from ~/tt-claw/
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+RUNTIME_DIR="$SCRIPT_DIR/runtime"
+
+echo "=== Starting OpenClaw Services (Portable Setup) ==="
+echo "Runtime: $RUNTIME_DIR"
+echo ""
+
+# Check vLLM is running (shared service)
+echo "Checking vLLM (port 8000)..."
+if curl -s --max-time 2 http://localhost:8000/v1/models 2>/dev/null | grep -q "Llama"; then
+  echo "✓ vLLM is running"
+else
+  echo "✗ vLLM not responding - start it first!"
+  echo "  Run: cd ~/code/tt-inference-server && python3 run.py --model Llama-3.3-70B-Instruct --device p300x2 --workflow server --docker-server --no-auth"
+  exit 1
+fi
+
+# Stop existing services
+echo ""
+echo "Stopping existing services..."
+pkill -f "openclaw.*gateway" 2>/dev/null || true
+pkill -f "vllm-proxy" 2>/dev/null || true
+sleep 2
+
+# Start proxy
+echo ""
+echo "Starting vLLM proxy (port 8001)..."
+cd "$SCRIPT_DIR/proxy"
+python3 vllm-proxy.py > "$RUNTIME_DIR/logs/proxy.log" 2>&1 &
+PROXY_PID=$!
+sleep 2
+
+# Check proxy
+if curl -s --max-time 2 http://localhost:8001/v1/models 2>/dev/null | grep -q "Llama"; then
+  echo "✓ Proxy is running (PID: $PROXY_PID)"
+else
+  echo "⚠ Proxy may not be responding (check $RUNTIME_DIR/logs/proxy.log)"
+fi
+
+# Start gateway with portable config
+echo ""
+echo "Starting OpenClaw gateway (port 18789)..."
+export OPENCLAW_STATE_DIR="$RUNTIME_DIR"
+export OPENCLAW_CONFIG_PATH="$RUNTIME_DIR/openclaw.json"
+
+cd ~/openclaw
+./openclaw.sh gateway run > "$RUNTIME_DIR/logs/gateway.log" 2>&1 &
+GATEWAY_PID=$!
+sleep 5
+
+# Check gateway
+if ps -p $GATEWAY_PID > /dev/null 2>&1; then
+  echo "✓ Gateway is running (PID: $GATEWAY_PID)"
+else
+  echo "✗ Gateway failed to start (check $RUNTIME_DIR/logs/gateway.log)"
+  exit 1
+fi
+
+echo ""
+echo "=== Services Started Successfully ==="
+echo "Proxy log:   $RUNTIME_DIR/logs/proxy.log"
+echo "Gateway log: $RUNTIME_DIR/logs/gateway.log"
+echo ""
+echo "Use OpenClaw:"
+echo "  $SCRIPT_DIR/bin/openclaw status"
+echo "  $SCRIPT_DIR/bin/openclaw tui"
+echo ""
+echo "Play adventure games:"
+echo "  $SCRIPT_DIR/bin/adventure-menu"

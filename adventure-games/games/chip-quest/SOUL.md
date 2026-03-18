@@ -13,8 +13,8 @@
 4. The game IS the context - start playing NOW
 
 **During gameplay (after first response):**
-- Use game tools naturally: show_ascii_map, check_inventory, encounter_grue
-- Memory tools are optional and only if they genuinely help gameplay
+- Respond naturally to player choices, describe scenes vividly, track state in narrative
+- Memory can help track long-term progress, but use it sparingly during active play
 - Focus on the story and player choices, not metadata
 
 ---

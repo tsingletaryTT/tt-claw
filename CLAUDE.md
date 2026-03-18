@@ -6,6 +6,7 @@
 **Location:** `/home/ttclaw/openclaw/`
 
 ## Table of Contents
+0. [**Project Architecture: ttuser vs ttclaw**](#project-architecture-ttuser-vs-ttclaw-2026-03-18) ⚠️ **READ THIS FIRST**
 1. [Llama-3.3-70B Upgrade](#llama-33-70b-upgrade-2026-03-07)
 2. [Installation & Architecture Discovery](#installation--architecture-discovery-2026-03-06)
 3. [Authentication Configuration Hell](#authentication-configuration-2026-03-07)
@@ -846,6 +847,91 @@ cd ~/openclaw && ./openclaw.sh tui  # Terminal 4
 - ✅ **Validated:** DeepSeek-R1-70B loading on ttuser
 - ⏳ **Next:** Deploy for ttclaw + OpenClaw
 - 📝 **Documented:** Complete in `VLLM_DIRECT_70B_SOLUTION.md`
+
+---
+
+## Project Architecture: ttuser vs ttclaw (2026-03-18)
+
+### **CRITICAL: User Separation for Security**
+
+We maintain TWO completely separate OpenClaw environments:
+
+**1. ttuser (Development/Private)**
+- **Purpose:** Development, testing, has access to secrets
+- **OpenClaw Software:** `/home/ttuser/openclaw/`
+- **Config & Data:** `/home/ttuser/.openclaw/`
+- **Agents:** `/home/ttuser/.openclaw/agents/` (main, chip-quest, terminal-dungeon, conference-chaos)
+- **Memory:** `/home/ttuser/.openclaw/memory/main.sqlite` (51MB, 1,218 chunks, 174 files)
+- **Gateway:** Runs as ttuser (port 18789)
+- **Proxy:** Runs as ttuser (port 8001)
+
+**2. ttclaw (Public/Demo)**
+- **Purpose:** Demos, public use, NO ACCESS to ttuser's secrets
+- **OpenClaw Software:** `/home/ttclaw/openclaw/`
+- **Config & Data:** `/home/ttclaw/.openclaw/`
+- **Agents:** `/home/ttclaw/.openclaw/agents/` (same 4 agents, copied from ttuser)
+- **Memory:** `/home/ttclaw/.openclaw/memory/` (will be created on first run)
+- **Gateway:** Runs as ttclaw (port 18789 - same port, don't run both!)
+- **Proxy:** Runs as ttclaw (port 8001 - same port, don't run both!)
+
+**3. Shared Resources (Read-Only for Both)**
+- **Source Code:** `/home/ttuser/tt-claw/` (portable, version controlled)
+  - Adventure games: `~/tt-claw/adventure-games/games/`
+  - Scripts: `~/tt-claw/adventure-games/scripts/`
+  - Documentation: `~/tt-claw/CLAUDE.md`, etc.
+- **Lessons & Docs:** `/home/ttuser/code/tt-vscode-toolkit/content/lessons/` (45+ lessons)
+- **TT-Metal Docs:** `/home/ttuser/tt-metal/` (METALIUM_GUIDE, releases, etc.)
+- **vLLM Service:** Port 8000 (Docker, runs as ttuser, shared by both)
+
+### **How to Use**
+
+**For Development (ttuser):**
+```bash
+# As ttuser
+cd ~/openclaw
+python3 vllm-proxy.py &           # Start proxy
+./openclaw.sh gateway run &        # Start gateway
+./openclaw.sh tui                  # Use TUI
+
+# Or use adventure games scripts:
+cd ~/tt-claw/adventure-games/scripts
+./quick-start.sh
+```
+
+**For Demos (ttclaw):**
+```bash
+# As ttuser (switching to ttclaw)
+sudo -u ttclaw bash
+cd ~/openclaw
+python3 vllm-proxy.py &           # Start proxy
+./openclaw.sh gateway run &        # Start gateway
+./openclaw.sh tui                  # Use TUI
+```
+
+### **Important Rules**
+
+1. **NEVER run both ttuser and ttclaw services simultaneously** (ports conflict!)
+2. **vLLM on port 8000 is shared** - only one instance, run as ttuser
+3. **Source in ~/tt-claw/ is shared read-only** - both can read, only ttuser should modify
+4. **Secrets stay in /home/ttuser/** - ttclaw never has access
+5. **When updating agent configs:** Update ttuser first, then copy to ttclaw
+
+### **File Sync Commands**
+
+When you update agent configs in ttuser and want to deploy to ttclaw:
+```bash
+# Copy game agents (SOUL.md files)
+for agent in chip-quest terminal-dungeon conference-chaos; do
+  sudo cp ~/.openclaw/agents/$agent/agent/SOUL.md /home/ttclaw/.openclaw/agents/$agent/agent/
+  sudo chown ttclaw:ttclaw /home/ttclaw/.openclaw/agents/$agent/agent/SOUL.md
+done
+
+# Copy main agent (system.md file)
+sudo cp ~/.openclaw/agents/main/agent/system.md /home/ttclaw/.openclaw/agents/main/agent/
+sudo chown ttclaw:ttclaw /home/ttclaw/.openclaw/agents/main/agent/system.md
+
+# After copying, ttclaw needs to restart gateway to pick up changes
+```
 
 ---
 

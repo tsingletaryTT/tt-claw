@@ -1,0 +1,88 @@
+{
+  "models": {
+    "providers": {
+      "vllm": {
+        "baseUrl": "http://127.0.0.1:8000/v1",
+        "apiKey": "sk-no-auth-required",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "meta-llama/Llama-3.3-70B-Instruct",
+            "name": "Llama 3.3 70B Instruct",
+            "contextWindow": 131072,
+            "maxTokens": 8192
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "vllm/meta-llama/Llama-3.3-70B-Instruct"
+      },
+      "memorySearch": {
+        "extraPaths": [
+          "/home/ttuser/code/tt-vscode-toolkit/content/lessons",
+          "/home/ttuser/tt-metal/METALIUM_GUIDE.md",
+          "/home/ttuser/tt-metal/releases",
+          "/home/ttuser/tt-metal/contributing",
+          "/home/ttuser/code/tt-inference-server/README.md",
+          "/home/ttuser/code/tt-inference-server/docs",
+          "/home/ttuser/tt-claw/CLAUDE.md"
+        ],
+        "provider": "local",
+        "fallback": "none"
+      },
+      "compaction": {
+        "mode": "safeguard"
+      }
+    },
+    "list": [
+      {
+        "id": "main"
+      },
+      {
+        "id": "chip-quest",
+        "name": "chip-quest",
+        "workspace": "/home/ttuser/tt-claw/runtime/workspace-chip-quest",
+        "agentDir": "/home/ttuser/tt-claw/runtime/agents/chip-quest/agent",
+        "model": "vllm/meta-llama/Llama-3.3-70B-Instruct"
+      },
+      {
+        "id": "terminal-dungeon",
+        "name": "terminal-dungeon",
+        "workspace": "/home/ttuser/tt-claw/runtime/workspace-terminal-dungeon",
+        "agentDir": "/home/ttuser/tt-claw/runtime/agents/terminal-dungeon/agent",
+        "model": "vllm/meta-llama/Llama-3.3-70B-Instruct"
+      },
+      {
+        "id": "conference-chaos",
+        "name": "conference-chaos",
+        "workspace": "/home/ttuser/tt-claw/runtime/workspace-conference-chaos",
+        "agentDir": "/home/ttuser/tt-claw/runtime/agents/conference-chaos/agent",
+        "model": "vllm/meta-llama/Llama-3.3-70B-Instruct"
+      }
+    ]
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto",
+    "restart": true,
+    "ownerDisplay": "raw"
+  },
+  "gateway": {
+    "mode": "local",
+    "auth": {
+      "mode": "token",
+      "token": "bccb583817c764ce04f93b8484543627124711a5fe47b543"
+    },
+    "remote": {
+      "token": "bccb583817c764ce04f93b8484543627124711a5fe47b543"
+    }
+  },
+  "meta": {
+    "lastTouchedVersion": "2026.3.2",
+    "lastTouchedAt": "2026-03-16T23:46:40.537Z"
+  }
+}

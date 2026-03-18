@@ -1,0 +1,11 @@
+#!/bin/bash
+# OpenClaw Portable Wrapper
+# Uses ~/tt-claw/runtime/ for all state and config
+# Keeps everything visible and portable, no hidden ~/.openclaw
+
+# Set portable directories
+export OPENCLAW_STATE_DIR="$HOME/tt-claw/runtime"
+export OPENCLAW_CONFIG_PATH="$HOME/tt-claw/runtime/openclaw.json"
+
+# Run OpenClaw with portable config
+exec "$HOME/openclaw/openclaw.sh" "$@"

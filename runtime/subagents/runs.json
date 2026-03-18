@@ -1,0 +1,214 @@
+{
+  "version": 2,
+  "runs": {
+    "e2341849-da21-4170-a72a-4b570dedef05": {
+      "runId": "e2341849-da21-4170-a72a-4b570dedef05",
+      "childSessionKey": "agent:chip-quest:subagent:072c9da1-2f63-4625-a61b-c206058dcc53",
+      "requesterSessionKey": "agent:chip-quest:main",
+      "requesterOrigin": {
+        "channel": "webchat"
+      },
+      "requesterDisplayKey": "agent:chip-quest:main",
+      "task": "play game",
+      "cleanup": "keep",
+      "expectsCompletionMessage": true,
+      "spawnMode": "run",
+      "model": "vllm/meta-llama/Llama-3.3-70B-Instruct",
+      "runTimeoutSeconds": 0,
+      "createdAt": 1773851321836,
+      "startedAt": 1773851322213,
+      "archiveAtMs": 1773854921836,
+      "cleanupHandled": true,
+      "retainAttachmentsOnKeep": false,
+      "endedAt": 1773851455668,
+      "outcome": {
+        "status": "ok"
+      },
+      "endedReason": "subagent-complete",
+      "endedHookEmittedAt": 1773851700691,
+      "cleanupCompletedAt": 1773851700691
+    },
+    "9a4fa8dd-3e70-4618-a815-d52e070cec07": {
+      "runId": "9a4fa8dd-3e70-4618-a815-d52e070cec07",
+      "childSessionKey": "agent:chip-quest:subagent:bfac61b3-302a-4b5c-95df-525a81411b8c",
+      "requesterSessionKey": "agent:chip-quest:main",
+      "requesterOrigin": {
+        "channel": "webchat"
+      },
+      "requesterDisplayKey": "agent:chip-quest:main",
+      "task": "play game",
+      "cleanup": "keep",
+      "expectsCompletionMessage": true,
+      "spawnMode": "run",
+      "model": "vllm/meta-llama/Llama-3.3-70B-Instruct",
+      "runTimeoutSeconds": 0,
+      "createdAt": 1773851352621,
+      "startedAt": 1773851352655,
+      "archiveAtMs": 1773854952621,
+      "cleanupHandled": true,
+      "retainAttachmentsOnKeep": false,
+      "endedAt": 1773851463740,
+      "outcome": {
+        "status": "timeout"
+      },
+      "endedReason": "subagent-complete",
+      "cleanupCompletedAt": 1773851463738,
+      "suppressAnnounceReason": "killed",
+      "endedHookEmittedAt": 1773851463738
+    },
+    "c5105b94-5f13-433b-a7de-c9a7d3680fb7": {
+      "runId": "c5105b94-5f13-433b-a7de-c9a7d3680fb7",
+      "childSessionKey": "agent:chip-quest:subagent:c78a2969-31ac-4616-bc66-a356dfb239ac",
+      "requesterSessionKey": "agent:chip-quest:main",
+      "requesterOrigin": {
+        "channel": "webchat"
+      },
+      "requesterDisplayKey": "agent:chip-quest:main",
+      "task": "play game",
+      "cleanup": "keep",
+      "expectsCompletionMessage": true,
+      "spawnMode": "run",
+      "model": "vllm/meta-llama/Llama-3.3-70B-Instruct",
+      "runTimeoutSeconds": 0,
+      "createdAt": 1773851388940,
+      "startedAt": 1773851388987,
+      "archiveAtMs": 1773854988940,
+      "cleanupHandled": true,
+      "retainAttachmentsOnKeep": false,
+      "endedAt": 1773851463723,
+      "outcome": {
+        "status": "timeout"
+      },
+      "endedReason": "subagent-complete",
+      "endedHookEmittedAt": 1773851700690,
+      "cleanupCompletedAt": 1773851700690
+    },
+    "d5a42b8c-dd10-47bd-9a78-74c0ea58d130": {
+      "runId": "d5a42b8c-dd10-47bd-9a78-74c0ea58d130",
+      "childSessionKey": "agent:chip-quest:subagent:7b649271-f1f8-4976-8f50-2ef86b5527c4",
+      "requesterSessionKey": "agent:chip-quest:main",
+      "requesterOrigin": {
+        "channel": "webchat"
+      },
+      "requesterDisplayKey": "agent:chip-quest:main",
+      "task": "play game",
+      "cleanup": "keep",
+      "expectsCompletionMessage": true,
+      "spawnMode": "run",
+      "model": "vllm/meta-llama/Llama-3.3-70B-Instruct",
+      "runTimeoutSeconds": 0,
+      "createdAt": 1773851426021,
+      "startedAt": 1773851426059,
+      "archiveAtMs": 1773855026021,
+      "cleanupHandled": true,
+      "retainAttachmentsOnKeep": false,
+      "endedAt": 1773851463709,
+      "outcome": {
+        "status": "timeout"
+      },
+      "endedReason": "subagent-complete",
+      "endedHookEmittedAt": 1773851700691,
+      "cleanupCompletedAt": 1773851700691
+    },
+    "34200b58-5dea-4122-a933-859a224e39ce": {
+      "runId": "34200b58-5dea-4122-a933-859a224e39ce",
+      "childSessionKey": "agent:chip-quest:subagent:1d553d6e-f71f-473a-8ccd-4416110681e1",
+      "requesterSessionKey": "agent:chip-quest:main",
+      "requesterOrigin": {
+        "channel": "webchat"
+      },
+      "requesterDisplayKey": "agent:chip-quest:main",
+      "task": "play game",
+      "cleanup": "keep",
+      "expectsCompletionMessage": true,
+      "spawnMode": "run",
+      "model": "vllm/meta-llama/Llama-3.3-70B-Instruct",
+      "runTimeoutSeconds": 0,
+      "createdAt": 1773851470529,
+      "startedAt": 1773851470926,
+      "archiveAtMs": 1773855070529,
+      "cleanupHandled": false,
+      "retainAttachmentsOnKeep": false
+    },
+    "e1e8f757-f854-4aba-9711-8ef7896297ca": {
+      "runId": "e1e8f757-f854-4aba-9711-8ef7896297ca",
+      "childSessionKey": "agent:chip-quest:subagent:58b60767-f93f-45a0-b81a-3132feb14439",
+      "requesterSessionKey": "agent:chip-quest:main",
+      "requesterOrigin": {
+        "channel": "webchat"
+      },
+      "requesterDisplayKey": "agent:chip-quest:main",
+      "task": "play game",
+      "cleanup": "keep",
+      "expectsCompletionMessage": true,
+      "spawnMode": "run",
+      "model": "vllm/meta-llama/Llama-3.3-70B-Instruct",
+      "runTimeoutSeconds": 0,
+      "createdAt": 1773851511851,
+      "startedAt": 1773851512194,
+      "archiveAtMs": 1773855111851,
+      "cleanupHandled": false,
+      "retainAttachmentsOnKeep": false
+    },
+    "4d99e11b-ad9f-4859-b6bf-3164a0fabc67": {
+      "runId": "4d99e11b-ad9f-4859-b6bf-3164a0fabc67",
+      "childSessionKey": "agent:chip-quest:subagent:7a40c6bf-a42e-4963-8dee-5e8acfbb7c6e",
+      "requesterSessionKey": "agent:chip-quest:main",
+      "requesterOrigin": {
+        "channel": "webchat"
+      },
+      "requesterDisplayKey": "agent:chip-quest:main",
+      "task": "play game",
+      "cleanup": "keep",
+      "expectsCompletionMessage": true,
+      "spawnMode": "run",
+      "model": "vllm/meta-llama/Llama-3.3-70B-Instruct",
+      "runTimeoutSeconds": 0,
+      "createdAt": 1773851554303,
+      "startedAt": 1773851554668,
+      "archiveAtMs": 1773855154303,
+      "cleanupHandled": false,
+      "retainAttachmentsOnKeep": false
+    },
+    "95b4183c-aa57-40ea-bb25-611ab747a26e": {
+      "runId": "95b4183c-aa57-40ea-bb25-611ab747a26e",
+      "childSessionKey": "agent:chip-quest:subagent:a3ed13cf-4d1d-45bd-afc5-b65f3d416176",
+      "requesterSessionKey": "agent:chip-quest:main",
+      "requesterOrigin": {
+        "channel": "webchat"
+      },
+      "requesterDisplayKey": "agent:chip-quest:main",
+      "task": "play game",
+      "cleanup": "keep",
+      "expectsCompletionMessage": true,
+      "spawnMode": "run",
+      "model": "vllm/meta-llama/Llama-3.3-70B-Instruct",
+      "runTimeoutSeconds": 0,
+      "createdAt": 1773851613141,
+      "startedAt": 1773851613502,
+      "archiveAtMs": 1773855213141,
+      "cleanupHandled": false,
+      "retainAttachmentsOnKeep": false
+    },
+    "ca35f2b5-b431-4372-8321-f143016c0aa7": {
+      "runId": "ca35f2b5-b431-4372-8321-f143016c0aa7",
+      "childSessionKey": "agent:chip-quest:subagent:7675960b-d778-424d-85db-b68eeeb3ed14",
+      "requesterSessionKey": "agent:chip-quest:main",
+      "requesterOrigin": {
+        "channel": "webchat"
+      },
+      "requesterDisplayKey": "agent:chip-quest:main",
+      "task": "play game",
+      "cleanup": "keep",
+      "expectsCompletionMessage": true,
+      "spawnMode": "run",
+      "model": "vllm/meta-llama/Llama-3.3-70B-Instruct",
+      "runTimeoutSeconds": 0,
+      "createdAt": 1773851668470,
+      "startedAt": 1773851668829,
+      "archiveAtMs": 1773855268470,
+      "cleanupHandled": false,
+      "retainAttachmentsOnKeep": false
+    }
+  }
+}

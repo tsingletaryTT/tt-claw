@@ -1,0 +1,535 @@
+# tt-claw Architecture
+
+This document explains the technical design decisions and architecture of the tt-claw OpenClaw integration.
+
+## Table of Contents
+
+1. [Design Goals](#design-goals)
+2. [Visible Runtime Directory](#visible-runtime-directory)
+3. [Component Architecture](#component-architecture)
+4. [Configuration System](#configuration-system)
+5. [Safety Architecture](#safety-architecture)
+6. [Auto-Detection System](#auto-detection-system)
+7. [Extension Points](#extension-points)
+
+## Design Goals
+
+### Primary Goals
+
+1. **Transparency** - Use visible directories, not hidden ones
+2. **Isolation** - Separate from personal OpenClaw configuration
+3. **Safety** - Guarantee local-only operation (no accidental remote LLM usage)
+4. **Simplicity** - One command setup (`tt-claw setup`)
+5. **Education** - Easy to explore and learn from
+6. **Demo-Ready** - Can show people the actual files during demos
+
+### Non-Goals
+
+- **Not** a fork of OpenClaw (uses standard OpenClaw)
+- **Not** modifying OpenClaw code (pure configuration)
+- **Not** replacing personal OpenClaw usage (coexists peacefully)
+
+## Visible Runtime Directory
+
+### Decision: Use Visible Directory
+
+**Chosen approach**: `~/tt-claw/openclaw-runtime/` (visible, in repo)
+
+**Why not `~/.openclaw-tt-claw/` (hidden)?**
+- ❌ Hidden by default (harder to discover)
+- ❌ Separate from repo (split locations)
+- ❌ Less educational (people can't easily see structure)
+- ❌ Harder to demo ("let me show you this hidden directory...")
+
+**Why yes `~/tt-claw/openclaw-runtime/` (visible)?**
+- ✅ Discoverable (visible in file manager, IDE)
+- ✅ Understandable (clear separation between templates and runtime)
+- ✅ Explorable (`tt-claw explore` shows structure)
+- ✅ Self-contained (everything in one repo)
+- ✅ Version-controllable (templates in git, runtime in .gitignore)
+- ✅ Demo-friendly (can show actual files)
+- ✅ Clean removal (delete `~/tt-claw/` removes everything)
+
+### Directory Structure
+
+```
+tt-claw/
+├── config/                      # Version-controlled templates
+│   ├── system-prompts/
+│   │   ├── tenstorrent-expert.md
+│   │   └── game-master-base.md
+│   └── adventure-agents/
+│       ├── chip-quest/SOUL.md
+│       ├── terminal-dungeon/SOUL.md
+│       └── conference-chaos/SOUL.md
+│
+├── openclaw-runtime/            # Generated runtime (in .gitignore)
+│   ├── openclaw.json            # Main config (generated)
+│   ├── agents/
+│   │   ├── main/agent/
+│   │   │   ├── system.md        # Copied from config/
+│   │   │   └── models.json      # Minimal (defers to parent)
+│   │   └── [game]/agent/
+│   │       ├── system.md        # SOUL file
+│   │       └── models.json
+│   ├── workspace/               # Agent work areas
+│   ├── memory/                  # Vector database (local)
+│   └── gateway.log              # Logs
+│
+├── bin/
+│   └── tt-claw                  # Main CLI wrapper
+│
+├── lib/
+│   ├── openclaw-setup.sh        # Setup orchestration
+│   ├── vllm-detect.sh           # vLLM detection library
+│   └── safety-check.sh          # Configuration validation
+│
+└── docs/
+    ├── README.md                # User guide
+    ├── ARCHITECTURE.md          # This file
+    └── SAFETY.md                # Security guarantees
+```
+
+### Isolation Mechanism
+
+tt-claw uses OpenClaw's built-in `OPENCLAW_STATE_DIR` environment variable:
+
+```bash
+export OPENCLAW_STATE_DIR="$REPO_ROOT/openclaw-runtime"
+```
+
+When set, OpenClaw uses this directory instead of `~/.openclaw/`.
+
+This enables:
+- Multiple OpenClaw instances (personal + tt-claw)
+- Different configurations (different models, agents, settings)
+- Different ports (18789 for personal, 18790 for tt-claw)
+- Complete isolation (no config pollution)
+
+## Component Architecture
+
+### CLI Wrapper: `bin/tt-claw`
+
+**Purpose**: Single entry point for all tt-claw operations
+
+**Key features**:
+- Sets `OPENCLAW_STATE_DIR` automatically
+- Provides simple commands (setup, start, stop, tui, etc.)
+- Manages gateway lifecycle
+- Color-coded output (green=success, red=error, yellow=warning, blue=info)
+- Gateway port management (default 18790, configurable via `TT_CLAW_PORT`)
+
+**Design decision**: Bash script, not Python
+- **Why**: Simple process management, no dependencies, easy to debug
+- OpenClaw is already Node.js, vLLM is Python, tt-metal is C++
+- Adding another Python layer would be overkill for wrapper logic
+
+### Setup Library: `lib/openclaw-setup.sh`
+
+**Purpose**: Auto-detect vLLM and generate configuration
+
+**Process**:
+1. Detect vLLM endpoint (port 8000 or 8001)
+2. Query available models
+3. Select best model (prefers instruct/chat, larger sizes)
+4. Determine context window (from model name)
+5. Validate for use cases (expert ≥32K, games ≥64K)
+6. Create directory structure
+7. Generate `openclaw.json` with safe defaults
+8. Copy system prompts and SOUL files
+9. Validate safety (local-only check)
+
+**Design decision**: Generator, not modifier
+- Never modifies existing configs
+- Always generates fresh from templates
+- Safe to re-run (warns before overwriting)
+
+### Detection Library: `lib/vllm-detect.sh`
+
+**Purpose**: Modular vLLM detection and validation
+
+**Functions**:
+- `detect_vllm_endpoint()` - Finds vLLM on port 8000 or 8001
+- `get_vllm_models()` - Lists available models via API
+- `pick_best_model()` - Selects optimal model
+- `get_context_window()` - Determines context from model name
+- `validate_context_window()` - Checks adequacy for use case
+- `check_proxy_setup()` - Detects if compatibility proxy needed
+- `vllm_detect_report()` - Full detection report
+
+**Design decision**: Library, not script
+- Can be sourced for functions
+- Can be run directly for report
+- Exports variables for use by other scripts
+- Reusable across different use cases
+
+### Safety Check: `lib/safety-check.sh`
+
+**Purpose**: Verify local-only configuration
+
+**8 Safety Checks**:
+1. Config file exists
+2. Provider URLs are localhost only
+3. No real API keys (only dummy values)
+4. Memory search fallback is "none"
+5. Memory search provider is "local"
+6. No remote provider names (OpenAI, Anthropic, etc.)
+7. vLLM is accessible
+8. Runtime directory isolation
+
+**Design decision**: Comprehensive, not minimal
+- Better to over-check than under-check
+- Clear pass/fail/warn status
+- Actionable error messages
+- Non-zero exit code on failure (good for CI/CD)
+
+## Configuration System
+
+### Hierarchical Configuration
+
+OpenClaw supports configuration at multiple levels:
+
+1. **Global config** (`openclaw-runtime/openclaw.json`)
+   - Providers and models
+   - Agent defaults (model, memory search, native skills)
+
+2. **Agent configs** (`openclaw-runtime/agents/[name]/agent/models.json`)
+   - Can override parent config
+   - tt-claw uses minimal agent configs (defer to parent)
+
+3. **System prompts** (`openclaw-runtime/agents/[name]/agent/system.md`)
+   - Agent behavior and instructions
+   - Expert: comprehensive Tenstorrent guide
+   - Games: SOUL files with narrative content
+
+### Config Generation
+
+**Template → Generated**:
+
+```
+config/system-prompts/tenstorrent-expert.md
+  ↓ (copy during setup)
+openclaw-runtime/agents/main/agent/system.md
+```
+
+```
+config/adventure-agents/chip-quest/SOUL.md
+  ↓ (copy during setup)
+openclaw-runtime/agents/chip-quest/agent/system.md
+```
+
+**Auto-generated**:
+
+```
+lib/openclaw-setup.sh
+  ↓ (generate during setup)
+openclaw-runtime/openclaw.json
+```
+
+**Key insight**: Templates are version-controlled, runtime is generated and gitignored.
+
+### Priority Order
+
+For configuration values:
+
+1. Agent-specific `models.json` (highest priority)
+2. Global `openclaw.json`
+3. OpenClaw defaults (lowest priority)
+
+tt-claw uses this to minimize duplication:
+- Global config has provider and model definitions
+- Agent configs are minimal (empty `providers: {}`)
+- Agents inherit from global defaults
+
+## Safety Architecture
+
+### Threat Model
+
+**What we're preventing**:
+- Accidental use of remote LLMs (OpenAI, Anthropic, etc.)
+- Unintentional data leaks to remote services
+- Configuration drift (starting safe, becoming unsafe over time)
+
+**What we're NOT preventing**:
+- Deliberate modification (user can edit configs)
+- Physical access (local machine security)
+- vLLM vulnerabilities (out of scope)
+
+### Defense Layers
+
+**Layer 1: Config Generation (Preventive)**
+- Only generates localhost providers
+- Sets `memorySearch.fallback` to "none"
+- Uses dummy API keys
+- Validates before writing
+
+**Layer 2: Runtime Checks (Detective)**
+- `tt-claw start` verifies vLLM accessibility
+- Checks config exists before using
+- Validates safety before starting gateway
+
+**Layer 3: Audit (Detective)**
+- `tt-claw doctor` runs comprehensive safety check
+- Clear pass/fail/warn status
+- Can be run anytime by user
+- Non-destructive (only reads, never modifies)
+
+### Local-Only Guarantees
+
+**Provider configuration**:
+```json
+{
+  "providers": {
+    "vllm": {
+      "baseUrl": "http://127.0.0.1:8000/v1",  // ✅ Localhost
+      "apiKey": "sk-no-auth-required"          // ✅ Dummy
+    }
+  }
+}
+```
+
+**Memory search configuration**:
+```json
+{
+  "memorySearch": {
+    "provider": "local",     // ✅ Local embeddings (node-llama-cpp)
+    "fallback": "none"       // ✅ No remote fallback
+  }
+}
+```
+
+**Validation**:
+```bash
+# Automated check
+tt-claw doctor
+
+# Manual audit
+grep "baseUrl" openclaw-runtime/openclaw.json
+# Should only show 127.0.0.1 or localhost
+```
+
+## Auto-Detection System
+
+### vLLM Endpoint Detection
+
+**Priority**:
+1. Port 8001 (proxy) - check first
+2. Port 8000 (direct) - fallback
+
+**Why this order?**
+- If proxy is running, it's intentional (prefer it)
+- Proxy provides compatibility layer for older vLLM
+- Direct is fine if no proxy needed
+
+**Proxy detection**:
+Test if vLLM supports `strict` field:
+```bash
+curl -X POST http://localhost:8000/v1/chat/completions \
+  -d '{"model":"test","messages":[],"strict":true}'
+```
+
+If response includes "strict" error, proxy is needed.
+
+### Model Selection
+
+**Heuristics** (in order):
+1. Prefer instruct/chat models (better for Q&A)
+2. Among instruct, prefer 70B > 8B > others (larger = better)
+3. If no instruct, pick first available
+
+**Example**:
+```
+Available: [
+  "meta-llama/Llama-3.3-70B-Instruct",
+  "meta-llama/Llama-3.1-8B-Instruct",
+  "some-base-model"
+]
+
+Selected: "meta-llama/Llama-3.3-70B-Instruct"
+Reason: Instruct model, largest (70B)
+```
+
+### Context Window Determination
+
+**Heuristics**:
+- 70B models: 131,072 tokens (128K)
+- 8B models: 65,536 tokens (64K)
+- 1B models: 32,768 tokens (32K)
+- Default: 32,768 tokens
+
+**Validation**:
+- Expert agent: ≥32K required
+- Adventure games: ≥64K recommended (large SOUL files)
+
+**Why heuristics?**
+- Not all vLLM versions expose context window via API
+- Model name is reliable indicator
+- Can be manually overridden in config if wrong
+
+## Extension Points
+
+### Adding New Agents
+
+1. **Create system prompt**:
+   ```bash
+   nano config/system-prompts/my-agent.md
+   ```
+
+2. **Update setup script**:
+   Edit `lib/openclaw-setup.sh` to create agent directory and copy prompt
+
+3. **Start agent**:
+   ```bash
+   tt-claw start my-agent
+   ```
+
+### Adding New Documentation
+
+Edit `openclaw-runtime/openclaw.json`:
+```json
+{
+  "agents": {
+    "defaults": {
+      "memorySearch": {
+        "extraPaths": [
+          "/path/to/new/docs",
+          // ... existing paths
+        ]
+      }
+    }
+  }
+}
+```
+
+Restart gateway:
+```bash
+tt-claw restart
+```
+
+### Custom Models
+
+Edit `openclaw-runtime/openclaw.json`:
+```json
+{
+  "models": {
+    "providers": {
+      "vllm": {
+        "models": [
+          {
+            "id": "custom-model-id",
+            "name": "Custom Model",
+            "contextWindow": 65536,
+            "maxTokens": 8192
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+### Multiple vLLM Instances
+
+Add providers for each instance:
+```json
+{
+  "models": {
+    "providers": {
+      "vllm-8b": {
+        "baseUrl": "http://127.0.0.1:8000/v1",
+        "models": [...]
+      },
+      "vllm-70b": {
+        "baseUrl": "http://127.0.0.1:8002/v1",
+        "models": [...]
+      }
+    }
+  }
+}
+```
+
+Use different models for different agents:
+```json
+{
+  "agents": {
+    "expert": {
+      "model": { "primary": "vllm-70b/..." }
+    },
+    "chip-quest": {
+      "model": { "primary": "vllm-8b/..." }
+    }
+  }
+}
+```
+
+## Design Rationales
+
+### Why Bash for Scripts?
+
+**Decision**: Use Bash for CLI wrapper and setup scripts
+
+**Rationale**:
+- Simple process management (start/stop/status)
+- No runtime dependencies (bash is always available)
+- Easy to debug (set -x shows every command)
+- Familiar to sysadmins
+- Good for orchestrating other tools (OpenClaw, curl, etc.)
+
+**Alternatives considered**:
+- Python: Overkill for wrapper logic, adds dependency
+- Node.js: Would match OpenClaw but feels wrong for CLI tools
+- Compiled (Go, Rust): Too heavy for simple scripts
+
+### Why Visible Directory?
+
+**Decision**: Use visible `openclaw-runtime/` directory
+
+**Rationale** (user feedback: "Hidden dirs are harder for people to explore and understand"):
+- **Transparency**: Users can see what was created
+- **Education**: People learn by exploring
+- **Debugging**: Easy to check configs, logs, state
+- **Demo**: Can show during presentations
+- **Trust**: No "magic" hidden directories
+
+**Trade-off**: Directory is visible in file listings, but:
+- Clearly named (not random)
+- In .gitignore (won't be committed)
+- Self-documenting (`tt-claw explore` explains it)
+
+### Why Generator vs Modifier?
+
+**Decision**: Generate configs from scratch, don't modify existing
+
+**Rationale**:
+- **Idempotent**: Can re-run safely
+- **Predictable**: Always know what you'll get
+- **Safe**: Can't corrupt existing configs
+- **Testable**: Easy to verify generated output
+- **Recoverable**: Just delete and regenerate
+
+**Trade-off**: Manual config changes are lost on re-setup, but:
+- Templates are version-controlled
+- Runtime is in .gitignore (expected to be regenerated)
+- Users can back up `openclaw-runtime/` if needed
+
+### Why Isolated Runtime?
+
+**Decision**: Use separate directory (`openclaw-runtime/`) instead of modifying `~/.openclaw/`
+
+**Rationale**:
+- **Coexistence**: Personal OpenClaw and tt-claw can run simultaneously
+- **Safety**: Can't break personal OpenClaw configuration
+- **Clean removal**: Delete `tt-claw/` and everything is gone
+- **Experimentation**: Easy to try different configs
+- **Isolation**: tt-claw changes don't affect personal usage
+
+**Alternative**: Could have used OpenClaw profiles (`--profile tt-claw`)
+- Would create `~/.openclaw-tt-claw/` (hidden)
+- Shorter commands (`--profile` vs setting env var)
+- But: still hidden, still in home directory, less discoverable
+
+---
+
+**Last Updated**: March 16, 2026
+**Architecture Version**: 1.0
+**Status**: Stable

@@ -4,6 +4,10 @@
 
 set -e
 
+# Set portable runtime directories (CRITICAL!)
+export OPENCLAW_STATE_DIR="$HOME/tt-claw/runtime"
+export OPENCLAW_CONFIG_PATH="$HOME/tt-claw/runtime/openclaw.json"
+
 # Auto-detect OpenClaw installation
 if [ -n "$OPENCLAW_HOME" ]; then
     OPENCLAW_DIR="$OPENCLAW_HOME"
@@ -14,7 +18,7 @@ else
     exit 1
 fi
 
-SHARED_DIR="$HOME/.openclaw/shared"
+SHARED_DIR="$HOME/tt-claw/runtime/shared"
 
 # Colors for better UX
 CYAN='\033[0;36m'
