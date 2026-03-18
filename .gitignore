@@ -19,6 +19,24 @@ ENV/
 # Claude Code
 .claude/
 
+# OpenClaw runtime (sessions, tokens, state)
+runtime/
+
+# Temporary/status docs (keep only essential docs)
+*_COMPLETE.md
+*_FIX.md
+*_STATUS.md
+AFTER_*.md
+DEBUG_*.md
+FIXES_*.md
+IMPLEMENTATION_SUMMARY.md
+PROMPT_OPTIMIZATION_*.md
+QUICKSTART_*.md
+START_SERVICES.md
+TOOLS_STATUS.md
+TUI_CONNECTION_*.md
+TTCLAW_SETUP_*.md
+
 # IDEs
 .vscode/
 .idea/
@@ -77,3 +95,4 @@ runtime/memory/*.sqlite-journal
 
 # Keep config templates in git
 !config/
+CLEANUP_*.md
