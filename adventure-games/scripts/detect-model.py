@@ -27,7 +27,16 @@ from pathlib import Path
 
 # Configuration
 VLLM_PORTS = [8001, 8000]  # Try proxy first, then direct
-OPENCLAW_CONFIG = Path("/home/ttclaw/.openclaw/openclaw.json")
+
+# Auto-detect config path from environment or user
+if "OPENCLAW_CONFIG_PATH" in os.environ:
+    OPENCLAW_CONFIG = Path(os.environ["OPENCLAW_CONFIG_PATH"])
+elif Path.home().name == "ttclaw":
+    OPENCLAW_CONFIG = Path.home() / ".openclaw" / "openclaw.json"
+else:
+    # Default to tt-claw runtime for ttuser
+    OPENCLAW_CONFIG = Path.home() / "tt-claw" / "runtime" / "openclaw.json"
+
 BACKUP_SUFFIX = ".backup"
 
 # Model context window defaults (if not provided by API)
@@ -126,7 +135,7 @@ def create_model_config(model_info):
 
     return config
 
-def update_openclaw_config(model_config, dry_run=False):
+def update_openclaw_config(model_config, model_info, dry_run=False):
     """Update OpenClaw configuration with detected model"""
     if not OPENCLAW_CONFIG.exists():
         print(f"❌ Config not found: {OPENCLAW_CONFIG}")
@@ -150,6 +159,10 @@ def update_openclaw_config(model_config, dry_run=False):
         config["models"]["providers"] = {}
     if "vllm" not in config["models"]["providers"]:
         config["models"]["providers"]["vllm"] = {}
+
+    # Set baseUrl based on detected port (prefer proxy on 8001)
+    detected_port = model_info.get("port", 8001)
+    config["models"]["providers"]["vllm"]["baseUrl"] = f"http://127.0.0.1:{detected_port}/v1"
 
     # Set model
     config["models"]["providers"]["vllm"]["models"] = [model_config]
@@ -244,14 +257,14 @@ def main():
             time.sleep(0.2)
         sys.stdout.write("\n")
 
-    if update_openclaw_config(model_config, dry_run=args.dry_run):
+    if update_openclaw_config(model_config, model_info, dry_run=args.dry_run):
         if not args.dry_run:
             if quiet:
                 print(model_config['id'])  # Just model ID for scripts
             else:
                 print("\n✅ OpenClaw configured successfully!")
                 print("\n🎯 Ready to play:")
-                print("  cd /home/ttclaw/openclaw")
+                print("  cd ~/openclaw")
                 print("  ./adventure-menu.sh")
     else:
         if not quiet:

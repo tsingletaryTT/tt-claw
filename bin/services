@@ -10,14 +10,56 @@ echo "=== Starting OpenClaw Services (Portable Setup) ==="
 echo "Runtime: $RUNTIME_DIR"
 echo ""
 
-# Check vLLM is running (shared service)
-echo "Checking vLLM (port 8000)..."
-if curl -s --max-time 2 http://localhost:8000/v1/models 2>/dev/null | grep -q "Llama"; then
-  echo "✓ vLLM is running"
-else
+# Source detection library
+source "$SCRIPT_DIR/lib/vllm-detect.sh"
+
+# Check vLLM is running and detect model (shared service)
+echo "Detecting vLLM endpoint..."
+if ! detect_vllm_endpoint > /dev/null 2>&1; then
   echo "✗ vLLM not responding - start it first!"
-  echo "  Run: cd ~/code/tt-inference-server && python3 run.py --model Llama-3.3-70B-Instruct --device p300x2 --workflow server --docker-server --no-auth"
+  echo "  Docker: cd ~/code/tt-inference-server && python3 run.py --model <model> --workflow server --docker-server --no-auth"
+  echo "  Direct: See ~/tt-claw/docs/VLLM_DIRECT_70B_SOLUTION.md"
   exit 1
+fi
+
+# Get available models
+DETECTED_MODELS=$(get_vllm_models)
+if [ -z "$DETECTED_MODELS" ]; then
+  echo "✗ vLLM is running but no models found!"
+  exit 1
+fi
+
+# Pick best model
+DETECTED_MODEL=$(pick_best_model "$DETECTED_MODELS")
+DETECTED_CONTEXT=$(get_context_window "$DETECTED_MODEL")
+
+echo "✓ vLLM is running on port $VLLM_PORT"
+echo "  Model: $DETECTED_MODEL"
+echo "  Context: $DETECTED_CONTEXT tokens"
+
+# Update OpenClaw config with detected model
+echo ""
+echo "Updating OpenClaw config with detected model..."
+CONFIG_FILE="$RUNTIME_DIR/openclaw.json"
+BACKUP_FILE="$RUNTIME_DIR/openclaw.json.backup"
+
+if [ -f "$CONFIG_FILE" ]; then
+  # Backup config
+  cp "$CONFIG_FILE" "$BACKUP_FILE"
+
+  # Update model in config using jq
+  jq --arg model "$DETECTED_MODEL" \
+     --arg context "$DETECTED_CONTEXT" \
+     --arg model_ref "vllm/$DETECTED_MODEL" \
+     '.models.providers.vllm.models[0].id = $model |
+      .models.providers.vllm.models[0].contextWindow = ($context | tonumber) |
+      .agents.defaults.model.primary = $model_ref' \
+     "$CONFIG_FILE" > "$CONFIG_FILE.tmp" && mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
+
+  echo "✓ Config updated: $CONFIG_FILE"
+  echo "  Backup saved: $BACKUP_FILE"
+else
+  echo "⚠ Config not found: $CONFIG_FILE"
 fi
 
 # Stop existing services
@@ -36,7 +78,7 @@ PROXY_PID=$!
 sleep 2
 
 # Check proxy
-if curl -s --max-time 2 http://localhost:8001/v1/models 2>/dev/null | grep -q "Llama"; then
+if curl -s --max-time 2 http://localhost:8001/v1/models 2>/dev/null | grep -q '"id"'; then
   echo "✓ Proxy is running (PID: $PROXY_PID)"
 else
   echo "⚠ Proxy may not be responding (check $RUNTIME_DIR/logs/proxy.log)"

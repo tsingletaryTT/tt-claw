@@ -49,11 +49,26 @@ auto_detect_model() {
         return 0
     fi
 
-    # Try to detect model from vLLM if available
+    # Run detection script to update config if vLLM is available
+    local SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local DETECT_SCRIPT="$SCRIPT_DIR/detect-model.py"
+
+    if [ -f "$DETECT_SCRIPT" ]; then
+        # Run detection quietly, only showing result
+        if python3 "$DETECT_SCRIPT" --quiet 2>/dev/null; then
+            local MODEL=$(python3 "$DETECT_SCRIPT" --quiet 2>/dev/null)
+            if [ -n "$MODEL" ]; then
+                echo -e "${CYAN}🎯 Detected model: $MODEL${NC}"
+                return 0
+            fi
+        fi
+    fi
+
+    # Fallback: just check if proxy is responding
     if curl -s http://127.0.0.1:8001/v1/models > /dev/null 2>&1; then
         local MODEL=$(curl -s http://127.0.0.1:8001/v1/models 2>/dev/null | python3 -c "import sys, json; data=json.load(sys.stdin); print(data['data'][0]['id'] if data.get('data') else '')" 2>/dev/null || echo "")
         if [ -n "$MODEL" ]; then
-            echo -e "${CYAN}🎯 Detected model: $MODEL${NC}"
+            echo -e "${CYAN}🎯 Model available: $MODEL${NC}"
         fi
     fi
     return 0
