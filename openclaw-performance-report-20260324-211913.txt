@@ -1,0 +1,80 @@
+Traceback (most recent call last):
+  File "/home/ttuser/tt-claw/test-openclaw-performance.py", line 301, in main
+    await tester.run_all_tests()
+  File "/home/ttuser/tt-claw/test-openclaw-performance.py", line 201, in run_all_tests
+    result = await self.run_test(category, test)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ttuser/tt-claw/test-openclaw-performance.py", line 149, in run_test
+    response = await self.send_message(test['prompt'])
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ttuser/tt-claw/test-openclaw-performance.py", line 131, in send_message
+    await self.ws.send(json.dumps(request))
+  File "/home/ttuser/.tenstorrent-venv/lib/python3.12/site-packages/websockets/legacy/protocol.py", line 635, in send
+    await self.ensure_open()
+  File "/home/ttuser/.tenstorrent-venv/lib/python3.12/site-packages/websockets/legacy/protocol.py", line 939, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: received 1008 (policy violation) invalid request frame; then sent 1008 (policy violation) invalid request frame
+OpenClaw Performance Test Suite
+Testing: Llama-3.1-8B-Instruct
+============================================================
+✓ Connected to OpenClaw gateway at ws://127.0.0.1:18789
+
+============================================================
+Category: BASIC COMMANDS
+============================================================
+
+  Testing: Simple question
+    Prompt: What is 2+2?...
+    Response time: 0.00s
+    Response: {'type': 'event', 'event': 'connect.challenge', 'payload': {'nonce': '1f68c559-8847-4215-8c50-8b7562...
+
+  Testing: Multi-step instruction
+    Prompt: List three colors, then tell me which one is your favorite a...
+
+
+Tests failed with error: received 1008 (policy violation) invalid request frame; then sent 1008 (policy violation) invalid request frame
+
+================================================================================
+Report saved to: /home/ttuser/tt-claw/openclaw-performance-report-20260324-211914.txt
+================================================================================
+
+================================================================================
+OPENCLAW PERFORMANCE REPORT
+Model: Llama-3.1-8B-Instruct
+Date: 2026-03-24 21:19:14
+Total tests: 1
+================================================================================
+
+OVERALL STATISTICS:
+  Successful: 1/1 (100.0%)
+  Failed: 0
+  Average response time: 0.00s
+
+================================================================================
+CATEGORY BREAKDOWN:
+================================================================================
+
+BASIC COMMANDS:
+--------------------------------------------------------------------------------
+
+  ✓ Simple question
+     Prompt: What is 2+2?
+     Expected: should give correct answer (4)
+     Time: 0.00s
+     Criteria: correctness, brevity
+
+     Response (130 chars):
+       {'type': 'event', 'event': 'connect.challenge', 'payload': {'nonce': '1f68c559-8847-4215-8c50-8b75625bf2e1', 'ts': 1774412353420}}
+
+
+================================================================================
+MANUAL EVALUATION GUIDE:
+================================================================================
+
+For each test, evaluate:
+  1. Did it follow instructions correctly?
+  2. Did it use tools when expected?
+  3. Was the response creative/engaging?
+  4. Did it provide citations when using memory?
+  5. Was reasoning clear and logical?
+  6. Did it maintain context across tests?

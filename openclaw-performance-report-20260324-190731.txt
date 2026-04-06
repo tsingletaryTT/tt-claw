@@ -1,0 +1,40 @@
+================================================================================
+OPENCLAW PERFORMANCE REPORT
+Model: Llama-3.1-8B-Instruct
+Date: 2026-03-24 19:07:31
+Total tests: 1
+================================================================================
+
+OVERALL STATISTICS:
+  Successful: 1/1 (100.0%)
+  Failed: 0
+  Average response time: 0.00s
+
+================================================================================
+CATEGORY BREAKDOWN:
+================================================================================
+
+BASIC COMMANDS:
+--------------------------------------------------------------------------------
+
+  ✓ Simple question
+     Prompt: What is 2+2?
+     Expected: should give correct answer (4)
+     Time: 0.00s
+     Criteria: correctness, brevity
+
+     Response (130 chars):
+       {'type': 'event', 'event': 'connect.challenge', 'payload': {'nonce': 'dd999bf6-29f7-4d7f-a7f0-7eb3f16191c0', 'ts': 1774404450159}}
+
+
+================================================================================
+MANUAL EVALUATION GUIDE:
+================================================================================
+
+For each test, evaluate:
+  1. Did it follow instructions correctly?
+  2. Did it use tools when expected?
+  3. Was the response creative/engaging?
+  4. Did it provide citations when using memory?
+  5. Was reasoning clear and logical?
+  6. Did it maintain context across tests?

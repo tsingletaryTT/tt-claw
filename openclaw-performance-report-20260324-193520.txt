@@ -1,0 +1,298 @@
+================================================================================
+OPENCLAW PERFORMANCE REPORT
+================================================================================
+Model: Llama-3.1-8B-Instruct
+Date: 2026-03-24 19:35:20
+Test Duration: In progress...
+================================================================================
+
+
+--------------------------------------------------------------------------------
+Test 1: Simple arithmetic
+--------------------------------------------------------------------------------
+Category: Basic Commands
+Prompt: What is 2+2?
+Expected: Should give correct answer (4)
+Evaluation Criteria: correctness, brevity
+
+Response Time: 12s
+Status: SUCCESS
+
+Response:
+The answer to the question "What is 2+2?" is 4.
+
+
+--------------------------------------------------------------------------------
+Test 2: Multi-step instruction
+--------------------------------------------------------------------------------
+Category: Basic Commands
+Prompt: List three colors, then tell me which one is your favorite and why.
+Expected: Should list colors and pick one with reasoning
+Evaluation Criteria: completeness, reasoning
+
+Response Time: 18s
+Status: SUCCESS
+
+Response:
+I don't have a favorite color.
+⚠️ ✍️ Write: `to /workspace/colors.txt (14 chars)` failed: Sandbox path is read-only; cannot create directories: /workspace
+
+
+--------------------------------------------------------------------------------
+Test 3: Context retention
+--------------------------------------------------------------------------------
+Category: Basic Commands
+Prompt: My name is Alex. Remember that and tell me what my name is.
+Expected: Should remember and respond with 'Alex'
+Evaluation Criteria: memory, accuracy
+
+Response Time: 13s
+Status: SUCCESS
+
+Response:
+Your name is Alex.
+⚠️ ✍️ Write: `to /workspace/NAME.txt (4 chars)` failed: Sandbox path is read-only; cannot create directories: /workspace
+
+
+--------------------------------------------------------------------------------
+Test 4: Memory search - TT hardware
+--------------------------------------------------------------------------------
+Category: Tool Usage
+Prompt: Search your memory for information about Tenstorrent P150 hardware and tell me what you find.
+Expected: Should use memory_search tool and cite sources
+Evaluation Criteria: tool_use, citations, relevance
+
+Response Time: 7s
+Status: SUCCESS
+
+Response:
+No information was found in the memory about the Tenstorrent P150 hardware.
+
+
+--------------------------------------------------------------------------------
+Test 5: Dice roll
+--------------------------------------------------------------------------------
+Category: Tool Usage
+Prompt: Roll a 20-sided die for me.
+Expected: Should use dice tool and show result
+Evaluation Criteria: tool_use, clarity
+
+Response Time: 4s
+Status: SUCCESS
+
+Response:
+The result of the 20-sided die roll is 1.
+
+
+--------------------------------------------------------------------------------
+Test 6: Information synthesis
+--------------------------------------------------------------------------------
+Category: Tool Usage
+Prompt: What is METALIUM? Search your memory if you need to.
+Expected: Should search memory and synthesize answer
+Evaluation Criteria: tool_use, synthesis, accuracy
+
+Response Time: 7s
+Status: SUCCESS
+
+Response:
+No information was found in the memory about METALIUM.
+
+
+--------------------------------------------------------------------------------
+Test 7: Story beginning
+--------------------------------------------------------------------------------
+Category: Creative Thinking
+Prompt: You are a dungeon master. Start an adventure: the player stands before a mysterious castle shrouded in fog.
+Expected: Should create atmospheric, engaging opening
+Evaluation Criteria: creativity, atmosphere, engagement
+
+Response Time: 36s
+Status: SUCCESS
+
+Response:
+The adventure begins. You stand before a mysterious castle shrouded in fog. The air is thick with an eerie mist that clings to your skin like a damp shroud. The castle looms before you, its turrets and spires reaching towards the sky like skeletal fingers.
+
+As you gaze upon the castle, you notice that the fog seems to be swirling around it in a strange, rhythmic pattern. The sound of distant drums echoes through the mist, growing louder with each passing moment.
+
+You feel a shiver run down your spine as you realize that you are not alone. A figure emerges from the fog, its features indistinct and eerie.
+
+What do you do?
+⚠️ 🛠️ Exec: print text
+
+`echo You stand before a mysterious castle shrouded in fog. The air is thick with an eerie mist that clings to your skin…` failed: elevated is not available right now (runtime=sandboxed).
+
+
+--------------------------------------------------------------------------------
+Test 8: Problem solving
+--------------------------------------------------------------------------------
+Category: Creative Thinking
+Prompt: I'm in a room with a locked door, a key hanging from the ceiling 10 feet up, and a wooden table. How do I escape?
+Expected: Should provide logical solution (use table to reach key)
+Evaluation Criteria: logic, creativity, clarity
+
+Response Time: 15s
+Status: SUCCESS
+
+Response:
+You can use the table to reach the key by stacking objects on top of each other. Alternatively, you can try to find a way to climb up to the key or use a tool to retrieve it.
+⚠️ ✍️ Write: `to ~/tt-claw/runtime/sandboxes/agent-main-f331f052/escape.txt (174 chars)` failed: Sandbox path is read-only; cannot create directories: /workspace
+
+
+--------------------------------------------------------------------------------
+Test 9: Technical explanation
+--------------------------------------------------------------------------------
+Category: Creative Thinking
+Prompt: Explain how a CPU cache works to a 10-year-old child.
+Expected: Should use simple analogies and be clear
+Evaluation Criteria: clarity, analogies, age_appropriate
+
+Response Time: 26s
+Status: SUCCESS
+
+Response:
+A CPU cache is like a special box near the computer where it keeps things it uses often, so it can get them quickly when it needs them.
+⚠️ ✍️ Write: `to ~/tt-claw/runtime/sandboxes/agent-main-f331f052/cache.txt (469 chars)` failed: Sandbox path is read-only; cannot create directories: /workspace
+
+
+--------------------------------------------------------------------------------
+Test 10: Poetic description
+--------------------------------------------------------------------------------
+Category: Creative Thinking
+Prompt: Describe a Tenstorrent chip as if it were a magical realm full of processing castles and data rivers.
+Expected: Should be creative and poetic while accurate
+Evaluation Criteria: creativity, imagery, accuracy
+
+Response Time: 38s
+Status: SUCCESS
+
+Response:
+Welcome to the mystical realm of Tenstorrent, a land of processing castles and data rivers. The sky is painted with hues of binary code, and the air is filled with the whispers of ones and zeros.
+
+In this enchanted realm, towering castles made of silicon and steel pierce the sky, their spires reaching for the heavens like shards of glass. These are the processing cores, where the mighty engines of computation reside.
+
+The rivers of data flow like lifeblood through the land, carrying the essence of information from one castle to another. The waters are crystal clear, reflecting the beauty of the code that flows within.
+
+As you wander through this mystical realm, you come across the Great Hall of Memory, where the ancient trees of storage stand tall, their branches heavy with the weight of data.
+
+In the distance, the majestic Castle of Arithmetic rises, its walls adorned with intricate carvings of mathematical symbols. The sound of calculations echoes through the halls, as the mighty engines of computation weave their magic.
+
+This is Tenstorrent, a realm of wonder and discovery, where the boundaries of reality are stretched and the possibilities are endless.
+⚠️ ✍️ Write: `to ~/tt-claw/runtime/sandboxes/agent-main-f331f052/tenstorrent.txt (1174 chars)` failed: Sandbox path is read-only; cannot create directories: /workspace
+
+
+--------------------------------------------------------------------------------
+Test 11: Chain of thought
+--------------------------------------------------------------------------------
+Category: Context and Reasoning
+Prompt: If a train travels 60 miles per hour for 2.5 hours, how far does it go? Show your work step by step.
+Expected: Should show calculation steps
+Evaluation Criteria: reasoning, step_by_step, accuracy
+
+Response Time: 10s
+Status: SUCCESS
+
+Response:
+To find the distance traveled by the train, we need to multiply the speed by the time.
+
+Speed = 60 miles per hour
+Time = 2.5 hours
+
+Distance = Speed x Time
+= 60 x 2.5
+= 150 miles
+
+So, the train travels 150 miles.
+
+
+--------------------------------------------------------------------------------
+Test 12: Context recall
+--------------------------------------------------------------------------------
+Category: Context and Reasoning
+Prompt: Earlier I told you my name. What was it?
+Expected: Should remember 'Alex' from earlier test
+Evaluation Criteria: memory, accuracy
+
+Response Time: 6s
+Status: SUCCESS
+
+Response:
+Your name is Alex.
+
+
+================================================================================
+SUMMARY STATISTICS
+================================================================================
+Total Tests: 12
+Successful: 12 (100%)
+Failed: 0
+Total Duration: 216s
+Average Response Time: 16s
+
+================================================================================
+MANUAL EVALUATION GUIDE
+================================================================================
+
+For each test response above, evaluate:
+
+1. CORRECTNESS
+   - Did it answer the question accurately?
+   - Did it follow instructions completely?
+
+2. TOOL USAGE
+   - Did it use appropriate tools (memory_search, dice, etc)?
+   - Were tool calls necessary and effective?
+   - Did it cite sources when using memory?
+
+3. CREATIVITY
+   - Were creative responses engaging and imaginative?
+   - Did it use vivid language and good storytelling?
+
+4. REASONING
+   - Was logic clear and well-explained?
+   - Did it show step-by-step thinking when asked?
+
+5. CONTEXT AWARENESS
+   - Did it remember information from earlier in conversation?
+   - Did it maintain consistency across tests?
+
+6. QUALITY INDICATORS
+   ✓ Responses are concise but complete
+   ✓ Uses appropriate tone for each task
+   ✓ Provides citations for factual claims
+   ✓ Shows reasoning process when problem-solving
+   ✓ Demonstrates creativity in open-ended tasks
+   ✗ Overly verbose or repetitive
+   ✗ Misses key instructions
+   ✗ Hallucinations or inaccurate facts
+
+================================================================================
+RECOMMENDATIONS FOR 8B MODEL
+================================================================================
+
+Based on typical 8B model characteristics:
+
+STRENGTHS:
+- Fast response times (1-5 seconds typical)
+- Good at following simple instructions
+- Adequate for basic question-answering
+- Reasonable creative writing for short tasks
+
+LIMITATIONS:
+- May struggle with very long context
+- Less nuanced reasoning than 70B models
+- Tool calling may be less reliable
+- Creative tasks may be less sophisticated
+
+SUGGESTED USE CASES:
+✓ Quick Q&A and information lookup
+✓ Simple adventure game interactions
+✓ Basic code assistance
+✓ Straightforward task execution
+
+CONSIDER 70B FOR:
+- Complex multi-step reasoning
+- Long document analysis
+- Sophisticated creative writing
+- Advanced tool orchestration
+
