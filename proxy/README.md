@@ -1,29 +1,97 @@
 # vLLM Compatibility Proxy for OpenClaw
 
-This proxy solves an API compatibility issue between OpenClaw v2026.3.2 and the vLLM version running in Docker.
+> **Status (2026-04-18): The proxy is no longer needed.** All current TT vLLM Docker
+> images have `OpenAIBaseModel` with `extra="allow"` in `protocol.py`, which silently
+> accepts and ignores unknown fields including `strict`, `store`, and `prompt_cache_key`.
+> You can point OpenClaw directly at port 8000. See "Removing the Proxy" below for the
+> clean options, including the defense-in-depth vLLM `--middleware` approach.
 
-## The Problem
+This proxy was created to solve an API compatibility issue between OpenClaw v2026.3.2
+and an older vLLM Docker image. It is now obsolete.
 
-**OpenClaw v2026.3.2** uses the latest OpenAI API specification, which includes these fields:
-- `strict` - For structured output validation
-- `store` - For conversation persistence
-- `prompt_cache_key` - For prompt caching
+## Why It Was Needed (Historical)
 
-**vLLM (Docker version)** doesn't support these newer fields. Even though vLLM logs say the fields are "ignored", it still returns `400 Bad Request` errors, causing OpenClaw requests to fail.
+**OpenClaw v2026.3.2** sends newer OpenAI API fields at the top level of chat completions:
+- `strict` - structured output validation flag
+- `store` - Responses API persistence flag
+- `prompt_cache_key` - prompt caching key
 
-## The Solution
+**vLLM (Docker version)** at the time returned `400 Bad Request` on these fields.
+
+## Why It's No Longer Needed
+
+All available TT vLLM images — including the original `0.9.0-e867533-22be241` that
+motivated the proxy — define `OpenAIBaseModel` with `model_config = ConfigDict(extra="allow")`.
+This means unknown top-level fields in `/v1/chat/completions` are silently accepted and
+ignored. Confirmed in images:
+
+- `0.9.0-e867533-22be241` (proxy-era)  → `extra="allow"` ✓
+- `0.9.0-555f240-22be241` (current)   → `extra="allow"` ✓
+- `0.10.0-84b4c53-222ee06` (latest)   → `extra="allow"` ✓
+
+## Removing the Proxy
+
+### Option A: Point OpenClaw directly at port 8000 (no code changes)
+
+Edit `~/tt-claw/runtime/openclaw.json`:
+
+```json
+"vllm": {
+    "baseUrl": "http://127.0.0.1:8000/v1",
+    ...
+}
+```
+
+Stop the proxy process (`pkill -f vllm-proxy`). Done.
+
+### Option B: Defense-in-depth via vLLM's `--middleware` flag
+
+vLLM has a built-in `--middleware` CLI argument (added to `EngineArgs` in
+`cli_args.py:131`) that accepts importable Python callables injected as ASGI
+middleware before any request reaches Pydantic parsing. This is the server-side
+solution that survives future vLLM changes.
+
+`openclaw_compat_middleware.py` in this directory is the middleware implementation.
+To deploy it:
+
+1. **Bind-mount the middleware into the container** by patching `run_docker_server.py`
+   (same approach as `tt-local-generator/apply_patches.sh`):
+
+   ```python
+   # Add to run_docker_server.py before docker_command build loop
+   _compat_mw = Path("/home/ttuser/tt-claw/proxy/openclaw_compat_middleware.py")
+   if _compat_mw.exists():
+       docker_command += [
+           "--mount",
+           f"type=bind,src={_compat_mw},"
+           "dst=/home/container_app_user/tt-metal/openclaw_compat_middleware.py,"
+           "readonly",
+       ]
+   ```
+
+2. **Add `--middleware` to `vllm_override_args`** in model_spec.py or via run.py:
+
+   ```bash
+   python3 run.py \
+       --model Llama-3.3-70B-Instruct \
+       --tt-device p300x2 \
+       --workflow server \
+       --docker-server \
+       --no-auth \
+       --vllm-override-args '{
+           "enable_auto_tool_choice": true,
+           "tool_call_parser": "llama3_json",
+           "middleware": ["openclaw_compat_middleware.OpenClawCompatMiddleware"]
+       }'
+   ```
+
+   vLLM loads it via `importlib.import_module("openclaw_compat_middleware")` with
+   `PYTHONPATH` including `/home/container_app_user/tt-metal/` (the container's
+   `TT_METAL_HOME`).
+
+## The Proxy (Legacy)
 
 This proxy sits between OpenClaw and vLLM:
-
-```
-OpenClaw (port 8001) → Proxy (strips fields) → vLLM (port 8000) → Tenstorrent
-```
-
-**What it does:**
-1. Receives requests from OpenClaw on port 8001
-2. Strips `strict`, `store`, and `prompt_cache_key` from the request
-3. Forwards the clean request to vLLM on port 8000
-4. Returns vLLM's response back to OpenClaw
 
 ## Installation
 
@@ -186,23 +254,12 @@ class ProxyHandler(BaseHTTPRequestHandler):
         requests.post('http://localhost:8000/v1/...', json=data)
 ```
 
-### Why Not Fix vLLM?
+### Why Not Fix vLLM? (Now Moot)
 
-The vLLM version is locked in the Docker image (can't upgrade easily). Even if we could upgrade, the proxy approach is:
-- **Simpler** - No Docker rebuild required
-- **Safer** - Doesn't modify vLLM internals
-- **Portable** - Works with any vLLM version
-
-### Alternatives
-
-**Option 1: Downgrade OpenClaw** ❌
-Would lose features and compatibility with newer models.
-
-**Option 2: Upgrade vLLM** ⚠️
-Requires rebuilding Docker image, may break Tenstorrent optimizations.
-
-**Option 3: This proxy** ✅
-Simple, non-invasive, works with existing setup.
+As of all current TT vLLM images, vLLM already accepts extra fields silently.
+The right long-term approach if you need explicit stripping is the `--middleware`
+flag described in "Option B" above — no Docker rebuild, no image modification,
+no separate proxy process.
 
 ## See Also
 
